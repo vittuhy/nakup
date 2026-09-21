@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nákup</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nákup">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="light dark">
+<style>
+:root{
+  --bg:#FFFFFF; --bg-2:#F2F2F7;
+  --ink:#000000; --ink-2:#8E8E93; --ink-3:#AEAEB2;
+  --rule:#D9D9DE; --ring:#C7C7CC;
+  --accent:#C96A63; --accent-solid:#E4A09B; --on-accent:#FFFFFF;
+  --sheet:rgba(255,255,255,.86);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --bg-2:#1C1C1E;
+    --ink:#FFFFFF; --ink-2:#8E8E93; --ink-3:#636366;
+    --rule:#38383A; --ring:#5A5A5E;
+    --accent:#F2B8B5; --accent-solid:#F2B8B5; --on-accent:#3A1512;
+    --sheet:rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg-2:#1C1C1E;
+  --ink:#FFFFFF; --ink-2:#8E8E93; --ink-3:#636366;
+  --rule:#38383A; --ring:#5A5A5E;
+  --accent:#F2B8B5; --accent-solid:#F2B8B5; --on-accent:#3A1512;
+  --sheet:rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.35; letter-spacing:-.01em;
+  -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+  padding:env(safe-area-inset-top,0px) 16px 150px;
+}
+.wrap{max-width:620px; margin:0 auto}
+
+header.top{padding:22px 0 10px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
+.cog{background:none; border:0; padding:6px; color:var(--ink-3); font-size:1.15rem; cursor:pointer; line-height:1}
+.subline{margin-top:3px; font-size:.86rem; color:var(--ink-2); display:flex; gap:7px; align-items:baseline; min-height:20px; flex-wrap:wrap}
+.subline button{background:none; border:0; padding:0; font:inherit; color:var(--accent); cursor:pointer}
+.subline .sep{color:var(--ink-3)}
+
+.aisle{margin-top:14px}
+.aisle:first-child{margin-top:4px}
+.ahead{display:flex; align-items:center; gap:9px; width:100%; background:none; border:0; padding:6px 0 8px; cursor:pointer; color:inherit; font:inherit; text-align:left}
+.ahead .emo{font-size:1.28rem; line-height:1; flex:0 0 auto}
+.ahead .nm{font-size:1.26rem; font-weight:700; letter-spacing:-.02em; flex:1; min-width:0}
+.ahead .ct{font-size:.95rem; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.chev{flex:0 0 auto; width:13px; height:13px; border-right:2.2px solid var(--ink-2); border-bottom:2.2px solid var(--ink-2); transform:rotate(45deg) translate(-2px,-2px); transition:transform .18s ease; border-radius:1px}
+.aisle.shut .chev{transform:rotate(-45deg) translate(-2px,2px)}
+.aisle.shut .rows{display:none}
+
+.rows{border-top:.5px solid var(--rule)}
+.row{display:flex; align-items:center; gap:13px; padding:12px 0; border-bottom:.5px solid var(--rule)}
+.tick{flex:0 0 auto; width:24px; height:24px; border-radius:50%; padding:0; border:1.6px solid var(--ring); background:transparent; cursor:pointer; display:grid; place-items:center; position:relative}
+.tick::after{content:""; width:6px; height:11px; border:solid transparent; border-width:0 2.2px 2.2px 0; transform:rotate(42deg) translate(-1px,-1px)}
+.row.done .tick{background:var(--accent-solid); border-color:var(--accent-solid)}
+.row.done .tick::after{border-color:var(--on-accent)}
+.name{flex:1; min-width:0; word-break:break-word; cursor:pointer}
+.row.done .name{color:var(--ink-2); text-decoration:line-through; text-decoration-thickness:1px}
+.kill{flex:0 0 auto; background:none; border:0; color:var(--ink-3); cursor:pointer; font-size:1.35rem; line-height:1; padding:4px 2px 6px; opacity:.6}
+
+.empty{text-align:center; padding:60px 20px 40px; color:var(--ink-2); font-size:.95rem}
+.empty[hidden]{display:none!important}
+.empty strong{display:block; color:var(--ink); font-size:1.05rem; font-weight:600; margin-bottom:5px}
+
+.setup{border-radius:13px; background:var(--bg-2); padding:14px; margin-top:14px; font-size:.88rem; color:var(--ink-2); line-height:1.45}
+.setup[hidden]{display:none!important}
+.setup strong{display:block; color:var(--ink); font-size:1rem; margin-bottom:4px}
+.setup .kb{display:flex; gap:8px; margin-top:10px}
+.setup input{flex:1; min-width:0; font:inherit; font-size:.9rem; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:9px; padding:9px 12px; outline:none}
+.setup input:focus{border-color:var(--accent-solid)}
+.setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:.9rem}
+.setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
+
+.dock{position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--sheet); -webkit-backdrop-filter:saturate(180%) blur(22px); backdrop-filter:saturate(180%) blur(22px); border-top:.5px solid var(--rule); padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px))}
+.dock-in{max-width:620px; margin:0 auto; display:flex; align-items:flex-end; gap:10px}
+.dock textarea{flex:1; min-width:0; resize:none; font:inherit; color:var(--ink); background:var(--bg-2); border:.5px solid var(--rule); border-radius:19px; padding:9px 15px; min-height:38px; max-height:132px; outline:none; line-height:1.3}
+.dock textarea::placeholder{color:var(--ink-3)}
+.dock textarea:focus{border-color:var(--accent-solid)}
+.send{flex:0 0 auto; width:38px; height:38px; border-radius:50%; border:0; padding:0; background:var(--accent-solid); color:var(--on-accent); cursor:pointer; display:grid; place-items:center; font-size:1.3rem; font-weight:700; line-height:1}
+.send:disabled{opacity:.4; cursor:default}
+.send .spin{width:15px; height:15px; border-radius:50%; border:2px solid rgba(0,0,0,.28); border-top-color:currentColor; animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.msg{max-width:620px; margin:0 auto; font-size:.8rem; color:var(--ink-2); padding:6px 2px 0; line-height:1.35}
+.msg[hidden]{display:none!important}
+.msg.err{color:#E5695F}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Nákup</h1>
+      <div class="subline" id="subline"></div>
+    </div>
+    <button class="cog" id="cog" type="button" aria-label="Settings">&#9881;</button>
+  </header>
+
+  <div class="setup" id="setup" hidden>
+    <strong>OpenAI key</strong>
+    Needed to sort items into aisles. Stored only in this browser, never sent anywhere but OpenAI.
+    <div class="kb">
+      <input id="key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <button class="save" id="saveKey" type="button">Save</button>
+    </div>
+    <button class="drop" id="dropKey" type="button" hidden>Remove stored key</button>
+  </div>
+
+  <div class="empty" id="empty" hidden>
+    <strong>Nothing on the list</strong>
+    Add something below.
+  </div>
+
+  <div id="aisles"></div>
+</div>
+
+<div class="dock">
+  <div class="dock-in">
+    <textarea id="input" rows="1" placeholder="rohlíky, mrkev, dvě mléka…" autocomplete="off" autocapitalize="sentences" spellcheck="false"></textarea>
+    <button class="send" id="send" type="button" aria-label="Přidat">+</button>
+  </div>
+  <div class="msg" id="msg" hidden></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var SECTIONS = [
+    { name: "Ovoce & zelenina",     emoji: "🍇" },
+    { name: "Trvanlivé",            emoji: "🍝" },
+    { name: "Maso",                 emoji: "🍗" },
+    { name: "Pečivo",               emoji: "🥖" },
+    { name: "Uzeniny a lahůdky",    emoji: "🥓" },
+    { name: "Mléčné a chlazené",    emoji: "🧀" },
+    { name: "Nápoje",               emoji: "🧃" },
+    { name: "Drogerie a domácnost", emoji: "🧴" },
+    { name: "DM",                   emoji: "🔵" },
+    { name: "Ostatní",              emoji: "📦" }
+  ];
+  var FALLBACK = SECTIONS[SECTIONS.length - 1].name;
+  var MODEL = "gpt-4.1-mini";
+  var K_ITEMS = "nakup.items", K_SHUT = "nakup.shut", K_DONE = "nakup.showdone", K_KEY = "nakup.key";
+
+  var items = [], shut = {}, showDone = true, busy = false;
+
+  var elAisles = document.getElementById("aisles");
+  var elEmpty  = document.getElementById("empty");
+  var elSub    = document.getElementById("subline");
+  var elInput  = document.getElementById("input");
+  var elSend   = document.getElementById("send");
+  var elMsg    = document.getElementById("msg");
+  var elDock   = document.querySelector(".dock");
+  var elSetup  = document.getElementById("setup");
+  var elKey    = document.getElementById("key");
+  var elCog    = document.getElementById("cog");
+
+  function norm(s){
+    return String(s == null ? "" : s).toLowerCase().replace(/&/g, "a").replace(/\s+/g, " ").trim();
+  }
+  var BY_NORM = {};
+  SECTIONS.forEach(function(s){ BY_NORM[norm(s.name)] = s.name; });
+  function resolveSection(raw){ return BY_NORM[norm(raw)] || FALLBACK; }
+
+  function lsGet(k, d){
+    try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch(e){ return d; }
+  }
+  function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function getKey(){ try { return localStorage.getItem(K_KEY) || ""; } catch(e){ return ""; } }
+
+  var msgTimer = null;
+  function say(text, kind){
+    clearTimeout(msgTimer);
+    if(!text){ elMsg.hidden = true; sizeDock(); return; }
+    elMsg.hidden = false;
+    elMsg.className = "msg" + (kind === "err" ? " err" : "");
+    elMsg.textContent = text;
+    sizeDock();
+    if(kind !== "work") msgTimer = setTimeout(function(){ elMsg.hidden = true; sizeDock(); }, 7000);
+  }
+  function isErr(){ return elMsg.className.indexOf("err") !== -1 && !elMsg.hidden; }
+
+  function sizeDock(){ document.body.style.paddingBottom = (elDock.offsetHeight + 28) + "px"; }
+  function sizeInput(){
+    elInput.style.height = "auto";
+    elInput.style.height = Math.min(elInput.scrollHeight, 132) + "px";
+    sizeDock();
+  }
+
+  function render(){
+    var open = 0, done = 0;
+    items.forEach(function(it){ it.done ? done++ : open++; });
+
+    elSub.textContent = "";
+    if(items.length){
+      var t = document.createElement("span");
+      t.textContent = open + (open === 1 ? " položka" : " položek");
+      elSub.appendChild(t);
+      if(done){
+        var s1 = document.createElement("span"); s1.className = "sep"; s1.textContent = "·";
+        var b1 = document.createElement("button"); b1.type = "button";
+        b1.textContent = done + " hotovo · " + (showDone ? "skrýt" : "zobrazit");
+        b1.addEventListener("click", function(){ showDone = !showDone; lsSet(K_DONE, showDone); render(); });
+        var s2 = document.createElement("span"); s2.className = "sep"; s2.textContent = "·";
+        var b2 = document.createElement("button"); b2.type = "button";
+        b2.textContent = "smazat";
+        b2.addEventListener("click", clearDone);
+        elSub.appendChild(s1); elSub.appendChild(b1); elSub.appendChild(s2); elSub.appendChild(b2);
+      }
+    }
+
+    var buckets = {};
+    SECTIONS.forEach(function(s){ buckets[s.name] = []; });
+    items.forEach(function(it){ buckets[resolveSection(it.section)].push(it); });
+
+    var frag = document.createDocumentFragment(), anyVisible = false;
+
+    SECTIONS.forEach(function(sec){
+      var all = buckets[sec.name];
+      var list = showDone ? all : all.filter(function(x){ return !x.done; });
+      if(!list.length) return;
+      anyVisible = true;
+      list.sort(function(a, b){ return (a.addedAt || 0) - (b.addedAt || 0); });
+
+      var box = document.createElement("section");
+      box.className = "aisle" + (shut[sec.name] ? " shut" : "");
+
+      var head = document.createElement("button");
+      head.className = "ahead"; head.type = "button";
+      head.addEventListener("click", function(){ shut[sec.name] = !shut[sec.name]; lsSet(K_SHUT, shut); render(); });
+
+      var emo = document.createElement("span"); emo.className = "emo"; emo.textContent = sec.emoji;
+      var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = sec.name;
+      var ct = document.createElement("span"); ct.className = "ct";
+      var left = all.filter(function(x){ return !x.done; }).length;
+      ct.textContent = left ? String(left) : "";
+      var chev = document.createElement("span"); chev.className = "chev";
+      head.appendChild(emo); head.appendChild(nm); head.appendChild(ct); head.appendChild(chev);
+      box.appendChild(head);
+
+      var rows = document.createElement("div"); rows.className = "rows";
+      list.forEach(function(it){
+        var row = document.createElement("div");
+        row.className = "row" + (it.done ? " done" : "");
+        var tick = document.createElement("button");
+        tick.className = "tick"; tick.type = "button";
+        tick.setAttribute("aria-label", it.name);
+        tick.addEventListener("click", function(){ toggle(it); });
+        var name = document.createElement("div");
+        name.className = "name"; name.textContent = it.name;
+        name.addEventListener("click", function(){ toggle(it); });
+        var kill = document.createElement("button");
+        kill.className = "kill"; kill.type = "button"; kill.textContent = "×";
+        kill.setAttribute("aria-label", "Smazat " + it.name);
+        kill.addEventListener("click", function(){ remove(it); });
+        row.appendChild(tick); row.appendChild(name); row.appendChild(kill);
+        rows.appendChild(row);
+      });
+      box.appendChild(rows);
+      frag.appendChild(box);
+    });
+
+    elAisles.textContent = "";
+    elAisles.appendChild(frag);
+
+    elEmpty.hidden = true;
+    if(!items.length){
+      elEmpty.hidden = false;
+      elEmpty.firstElementChild.textContent = "Seznam je prázdný";
+    } else if(!anyVisible){
+      elEmpty.hidden = false;
+      elEmpty.firstElementChild.textContent = "Všechno hotovo";
+    }
+    sizeDock();
+  }
+
+  function newId(){ return "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function persist(){ lsSet(K_ITEMS, items); }
+
+  function toggle(it){ it.done = !it.done; persist(); render(); }
+  function remove(it){ items = items.filter(function(x){ return x.id !== it.id; }); persist(); render(); }
+  function clearDone(){ items = items.filter(function(x){ return !x.done; }); persist(); render(); }
+
+  function store(entries){
+    entries.forEach(function(e, i){
+      items.push({ id: newId(), name: e.name, section: e.section, done: false, addedAt: Date.now() + i });
+    });
+    persist(); render();
+  }
+
+  function naiveSplit(raw){
+    return {
+      add: raw.split(/[,\n;]+/).map(function(s){ return s.trim(); }).filter(Boolean)
+              .map(function(p){ return { section: FALLBACK, name: p }; }),
+      skip: []
+    };
+  }
+
+  function systemPrompt(){
+    return [
+      "You sort groceries into fixed supermarket aisle sections for a Czech shopper.",
+      "",
+      "SECTIONS - use these exact strings. Never invent, translate or rename one:",
+      SECTIONS.map(function(s, i){ return (i + 1) + ". " + s.name; }).join("\n"),
+      "",
+      "You get CURRENT LIST (already on the list) and NEW INPUT (free text, typed or dictated).",
+      "Split NEW INPUT into individual shopping items. It may be separated by commas, new",
+      "lines, the words \"and\" / \"a\", or spoken in one run. Repair obvious dictation errors.",
+      "Keep the shopper's own language and wording, and keep quantities as written.",
+      "Merge duplicates occurring inside NEW INPUT itself.",
+      "",
+      "An item already on CURRENT LIST goes in \"skip\", not \"add\". Match on meaning, not",
+      "characters: \"mliko\" = \"mleko\", \"tomatoes\" = \"rajcata\", singular = plural. Ignore",
+      "quantity when matching, unless the new item is a clearly different variant.",
+      "",
+      "Assign every added item to exactly one SECTION:",
+      "- soap, shampoo, toothpaste, cleaning, paper goods -> Drogerie a domácnost",
+      "- tinned, jarred, dried, packaged food, pasta, rice, flour -> Trvanlivé",
+      "- salami, ham, sausage, deli -> Uzeniny a lahůdky",
+      "- fresh meat, poultry, fish -> Maso",
+      "- bread, rolls, pastries -> Pečivo",
+      "- milk, yoghurt, cheese, butter, eggs, chilled -> Mléčné a chlazené",
+      "- all drinks incl. beer, wine, coffee, tea -> Nápoje",
+      "- DM only when the shopper says dm",
+      "\"" + FALLBACK + "\" is a last resort - re-read the sections before using it.",
+      "",
+      "Reply with JSON only, this shape:",
+      "{\"add\":[{\"section\":\"Pečivo\",\"name\":\"rohlíky 6 ks\"}],\"skip\":[\"mléko\"]}"
+    ].join("\n");
+  }
+
+  function userMsg(raw){
+    var cur = items.filter(function(x){ return !x.done; })
+                   .map(function(x){ return "- " + x.name; }).join("\n");
+    return "CURRENT LIST:\n" + (cur || "(empty)") + "\n\nNEW INPUT:\n" + raw;
+  }
+
+  async function askOpenAI(raw){
+    var key = getKey();
+    if(!key) return null;
+    var res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({
+        model: MODEL,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt() },
+          { role: "user", content: userMsg(raw) }
+        ]
+      })
+    });
+    if(!res.ok){
+      var e = new Error("http " + res.status);
+      e.status = res.status;
+      throw e;
+    }
+    var data = await res.json();
+    var txt = data && data.choices && data.choices[0] && data.choices[0].message
+      ? data.choices[0].message.content : "";
+    return JSON.parse(txt);
+  }
+
+  function clean(r){
+    var add = [], skip = [];
+    if(r && Array.isArray(r.add)) r.add.forEach(function(x){
+      if(!x) return;
+      var n = String(x.name == null ? "" : x.name).trim();
+      if(n) add.push({ name: n, section: resolveSection(x.section) });
+    });
+    if(r && Array.isArray(r.skip)) r.skip.forEach(function(x){
+      var n = String(x == null ? "" : x).trim();
+      if(n) skip.push(n);
+    });
+    return { add: add, skip: skip };
+  }
+
+  function setBusy(on){
+    busy = on;
+    elSend.disabled = on;
+    elSend.textContent = "";
+    if(on){ var sp = document.createElement("span"); sp.className = "spin"; elSend.appendChild(sp); }
+    else elSend.textContent = "+";
+  }
+
+  async function submit(){
+    if(busy) return;
+    var raw = elInput.value.trim();
+    if(!raw) return;
+
+    if(!getKey()){
+      elSetup.hidden = false;
+      say("Add your OpenAI key first — items went to " + FALLBACK + ".", "err");
+    }
+
+    setBusy(true);
+    if(!isErr()) say("Řadím do regálů…", "work");
+
+    var result = null;
+    try {
+      result = clean(await askOpenAI(raw));
+    } catch(e){
+      if(e && e.status === 401) say("Key rejected — items went to " + FALLBACK + ".", "err");
+      else if(e && e.status === 429) say("Rate limited — items went to " + FALLBACK + ".", "err");
+      else if(e && e.status) say("OpenAI error " + e.status + " — items went to " + FALLBACK + ".", "err");
+      else if(getKey()) say("No connection — items went to " + FALLBACK + ".", "err");
+    }
+
+    if(!result || (!result.add.length && !result.skip.length)) result = clean(naiveSplit(raw));
+
+    if(result.add.length) store(result.add);
+    else render();
+
+    elInput.value = "";
+    sizeInput();
+    setBusy(false);
+
+    if(!isErr()){
+      var bits = [];
+      if(result.add.length) bits.push("Přidáno " + result.add.length);
+      if(result.skip.length) bits.push("už na seznamu: " + result.skip.join(", "));
+      say(bits.length ? bits.join(" · ") : "Nic k přidání.");
+    }
+  }
+
+  elSend.addEventListener("click", submit);
+  elInput.addEventListener("input", sizeInput);
+  elInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); submit(); }
+  });
+
+  elCog.addEventListener("click", function(){
+    elSetup.hidden = !elSetup.hidden;
+    if(!elSetup.hidden){
+      elKey.value = "";
+      document.getElementById("dropKey").hidden = !getKey();
+      elKey.placeholder = getKey() ? "key stored — paste a new one to replace" : "sk-…";
+    }
+  });
+  document.getElementById("saveKey").addEventListener("click", function(){
+    var v = elKey.value.trim();
+    if(!v){ say("Nothing to save.", "err"); return; }
+    try { localStorage.setItem(K_KEY, v); } catch(e){}
+    elKey.value = "";
+    elSetup.hidden = true;
+    say("Key saved.");
+  });
+  document.getElementById("dropKey").addEventListener("click", function(){
+    try { localStorage.removeItem(K_KEY); } catch(e){}
+    elSetup.hidden = true;
+    say("Key removed.");
+  });
+
+  // ---- boot ----
+  items = lsGet(K_ITEMS, []); if(!Array.isArray(items)) items = [];
+  shut = lsGet(K_SHUT, {}) || {};
+  showDone = !!lsGet(K_DONE, true);
+  setBusy(false);
+  render();
+  sizeDock();
+  if(window.ResizeObserver){ try { new ResizeObserver(sizeDock).observe(elDock); } catch(e){} }
+  window.addEventListener("resize", sizeDock);
+  if(window.visualViewport) window.visualViewport.addEventListener("resize", sizeDock);
+
+  if(!getKey()) elSetup.hidden = false;
+
+  try {
+    var incoming = new URLSearchParams(location.search).get("add");
+    if(incoming && incoming.trim()){
+      elInput.value = incoming.trim();
+      sizeInput();
+      history.replaceState(null, "", location.pathname);
+      submit();
+    }
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
