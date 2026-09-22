@@ -134,6 +134,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .card-txt b{font-size:.97rem; font-weight:600; line-height:1.3}
 .card-txt i{font-style:normal; font-size:.77rem; color:var(--ink-3); line-height:1.3}
 .card-go{flex:0 0 auto; color:var(--ink-3); display:grid; place-items:center}
+.setup .fb{display:block; margin-top:9px; font-size:.83rem; color:var(--accent)}
+.setup .fb.err{color:var(--danger)}
 .setup .cardnote{display:block; margin-top:9px; font-size:.79rem; color:var(--ink-3); line-height:1.45}
 .setup a.mini{
   display:inline-block; margin-top:9px; font-size:.83rem;
@@ -268,6 +270,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         <button class="save" id="saveKey" type="button">Uložit</button>
       </div>
       <button class="drop" id="dropKey" type="button" hidden>Odstranit uložený klíč</button>
+      <span class="fb" id="keyFb" hidden></span>
     </div>
     <div class="blk">
       <strong>Synchronizace s GitHubem</strong>
@@ -280,6 +283,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
          target="_blank" rel="noopener">Vytvořit token na GitHubu →</a>
       <div class="ginfo" id="ginfo"></div>
       <button class="drop" id="dropTok" type="button" hidden>Vypnout synchronizaci</button>
+      <span class="fb" id="tokFb" hidden></span>
     </div>
     <div class="blk">
       <strong>Hlasové zadávání</strong>
@@ -306,6 +310,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       <div id="seclist"></div>
       <button class="addsec" id="addsec" type="button">+ Přidat sekci</button>
       <button class="drop" id="resetsec" type="button">Obnovit výchozí sekce</button>
+      <span class="fb" id="secFb" hidden></span>
     </div>
     <div class="blk">
       <strong>Prázdné sekce</strong>
@@ -322,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:02</span>
+      <span class="build">build 22.09. 12:04</span>
     </div>
   </div>
 
@@ -1200,6 +1205,18 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); submit(); }
   });
 
+  // settings hides the dock, so say() is invisible there — feedback goes inline
+  var fbTimers = {};
+  function fb(id, text, kind){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.hidden = false;
+    el.className = "fb" + (kind === "err" ? " err" : "");
+    el.textContent = text;
+    clearTimeout(fbTimers[id]);
+    fbTimers[id] = setTimeout(function(){ el.hidden = true; }, 4500);
+  }
+
   function refreshSetup(){
     elKey.value = "";
     elTok.value = "";
@@ -1232,10 +1249,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   document.getElementById("saveTok").addEventListener("click", async function(){
     var v = elTok.value.trim();
-    if(!v){ say("Není co uložit.", "err"); return; }
+    if(!v){ fb("tokFb", "Není co uložit.", "err"); return; }
     try { localStorage.setItem(K_TOK, v); } catch(e){}
     elTok.value = "";
-    say("Token uložen — ověřuji…", "work");
+    fb("tokFb", "Ověřuji…");
     await findGist();
     var remoteStamp = gistId() ? await syncPull() : 0;
     if(!gistId() || localStamp() > remoteStamp || items.length){
@@ -1244,14 +1261,14 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     }
     refreshSetup();
     var ok = elSync.className.indexOf("bad") === -1;
-    say(ok ? "Synchronizace běží." : "GitHub ten token odmítl.", ok ? null : "err");
+    fb("tokFb", ok ? "Synchronizace běží." : "GitHub ten token odmítl.", ok ? null : "err");
   });
 
   document.getElementById("dropTok").addEventListener("click", function(){
     try { localStorage.removeItem(K_TOK); localStorage.removeItem(K_GIST); } catch(e){}
     setSync("");
-    showSettings(false);
-    say("Synchronizace vypnuta. Gist zůstává.");
+    refreshSetup();
+    fb("tokFb", "Synchronizace vypnuta. Gist zůstává.");
   });
 
   elSync.addEventListener("click", function(){ syncPull().then(syncPush); });
@@ -1266,7 +1283,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     items.forEach(function(it){ it.section = resolveSection(it.section); });
     persist();
     saveSections(true);
-    say("V\u00fdchoz\u00ed sekce obnoveny.");
+    fb("secFb", "V\u00fdchoz\u00ed sekce obnoveny.");
   });
 
   var elAddSec = document.getElementById("addsec");
@@ -1281,16 +1298,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   });
   document.getElementById("saveKey").addEventListener("click", function(){
     var v = elKey.value.trim();
-    if(!v){ say("Není co uložit.", "err"); return; }
+    if(!v){ fb("keyFb", "Není co uložit.", "err"); return; }
     try { localStorage.setItem(K_KEY, v); } catch(e){}
-    elKey.value = "";
-    showSettings(false);
-    say("Klíč uložen.");
+    refreshSetup();
+    fb("keyFb", "Klíč uložen.");
   });
   document.getElementById("dropKey").addEventListener("click", function(){
     try { localStorage.removeItem(K_KEY); } catch(e){}
-    showSettings(false);
-    say("Klíč odstraněn.");
+    refreshSetup();
+    fb("keyFb", "Klíč odstraněn.");
   });
 
   // ---- boot ----
