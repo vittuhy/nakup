@@ -59,7 +59,7 @@ body{
 }
 .wrap{max-width:620px; margin:0 auto}
 
-header.top{padding:4px 0 10px}
+header.top{padding:14px 0 10px}
 .titlerow{display:flex; align-items:center; gap:10px}
 .titlerow h1{flex:1 1 auto; min-width:0; cursor:text}
 .titlerow input.title-edit{
@@ -78,8 +78,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .subline button{background:none; border:0; padding:0; font:inherit; color:var(--accent); cursor:pointer}
 .subline .sep{color:var(--ink-3)}
 
-.aisle{margin-top:14px}
-.aisle:first-child{margin-top:4px}
+.aisle{margin-top:16px}
+.aisle:first-child{margin-top:2px}
+.aisle:has(.ahead.bare){margin-top:0}
 .ahead{display:flex; align-items:center; gap:9px; width:100%; background:none; border:0; padding:8px 0; cursor:pointer; color:inherit; font:inherit; text-align:left}
 .ahead .emo{
   font-size:1.28rem; line-height:1; flex:0 0 auto;
@@ -95,7 +96,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .chev svg{display:block}
 .aisle.shut .chev{transform:rotate(-90deg)}
-.ahead.bare{cursor:default}
+.ahead.bare{cursor:default; padding:15px 0}
 .ahead.bare .nm, .ahead.bare .emo{opacity:.45}
 .aisle.shut .rows{display:none}
 
@@ -345,7 +346,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:29</span>
+      <span class="build">build 22.09. 13:32</span>
     </div>
   </div>
 
