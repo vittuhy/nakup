@@ -235,7 +235,18 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   }
   function isErr(){ return elMsg.className.indexOf("err") !== -1 && !elMsg.hidden; }
 
-  function sizeDock(){ /* dock is a flex sibling now; nothing to reserve */ }
+  // iOS moves the layout viewport when the keyboard opens and does not always
+  // put it back, which leaves a position:fixed shell offset against the visible
+  // area. Size the shell to the VISUAL viewport instead, on every change.
+  function sizeDock(){
+    var vv = window.visualViewport;
+    if(!vv) return;
+    var b = document.body.style;
+    b.bottom = "auto";
+    b.top = Math.max(0, vv.offsetTop) + "px";
+    b.height = vv.height + "px";
+    if(window.scrollY !== 0){ try { window.scrollTo(0, 0); } catch(e){} }
+  }
   function sizeInput(){
     elInput.style.height = "auto";
     elInput.style.height = Math.min(elInput.scrollHeight, 132) + "px";
@@ -589,6 +600,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     elInput.value = "";
     sizeInput();
     setBusy(false);
+    setTimeout(sizeDock, 120);
 
     if(!isErr()){
       var bits = [];
@@ -677,7 +689,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   sizeDock();
   if(window.ResizeObserver){ try { new ResizeObserver(sizeDock).observe(elDock); } catch(e){} }
   window.addEventListener("resize", sizeDock);
-  if(window.visualViewport) window.visualViewport.addEventListener("resize", sizeDock);
+  window.addEventListener("orientationchange", function(){ setTimeout(sizeDock, 120); });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize", sizeDock);
+    window.visualViewport.addEventListener("scroll", sizeDock);
+  }
+  elInput.addEventListener("focus", function(){ setTimeout(sizeDock, 120); });
+  elInput.addEventListener("blur", function(){ setTimeout(sizeDock, 120); });
 
   if(!getKey()) elSetup.hidden = false;
 
