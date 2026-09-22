@@ -1131,8 +1131,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     elTok.value = "";
     document.getElementById("dropKey").hidden = !getKey();
     document.getElementById("dropTok").hidden = !ghToken();
-    elKey.placeholder = getKey() ? "uloženo · vložením nahradíš" : "sk-…";
-    elTok.placeholder = ghToken() ? "uloženo · vložením nahradíš" : "github_pat_…";
+    elKey.placeholder = getKey() ? "Uloženo" : "sk-…";
+    elTok.placeholder = ghToken() ? "Uloženo" : "github_pat_…";
     elGinfo.textContent = "";
     if(ghToken() && gistId()){
       var a = document.createElement("a");
