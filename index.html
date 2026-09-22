@@ -81,6 +81,20 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .aisle{margin-top:16px}
 .aisle:first-child{margin-top:2px}
 .ahead{display:flex; align-items:center; gap:9px; width:100%; background:none; border:0; padding:8px 0; cursor:pointer; color:inherit; font:inherit; text-align:left}
+.ahead .atoggle{
+  flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:9px;
+  background:none; border:0; padding:0; font:inherit; color:inherit;
+  text-align:left; cursor:pointer;
+}
+.ahead.bare .atoggle{cursor:default}
+/* a touch stronger than the count it replaces, and easy to hit */
+.addbtn{
+  flex:0 0 auto; width:28px; height:28px; padding:0; border:0; background:none;
+  display:grid; place-items:center; line-height:0; cursor:pointer;
+  color:var(--ink-2); position:relative;
+}
+.addbtn::before{content:""; position:absolute; inset:-9px}
+.addbtn svg{display:block}
 .ahead .emo{
   font-size:1.28rem; line-height:1; flex:0 0 auto;
   width:25px; display:flex; align-items:center; justify-content:center;
@@ -111,15 +125,6 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .row.done .tick{background:var(--accent-solid); border-color:var(--accent-solid)}
 .row.done .tick::after{border-color:var(--on-accent)}
 .name{flex:1; min-width:0; word-break:break-word; cursor:text}
-.addrow{
-  display:flex; align-items:center; gap:13px; padding:6px 0 7px;
-  cursor:text; color:var(--ink-3); font-size:.92rem;
-}
-.addrow .dot{
-  flex:0 0 auto; width:24px; display:flex; align-items:center; justify-content:center;
-  color:var(--ink-3);
-}
-.addrow .dot svg{display:block}
 .rows input.edit, .row input.edit{
   flex:1 1 auto; min-width:0; font:inherit; color:var(--ink);
   background:var(--bg-2); border:.5px solid var(--accent-solid);
@@ -362,7 +367,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:42</span>
+      <span class="build">build 22.09. 13:48</span>
     </div>
   </div>
 
@@ -842,36 +847,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
       // nothing in it means nothing to collapse, so it gets no chevron and no tap
       var bare = list.length === 0;
+      var collapsed = !bare && shut[sec.name];
 
       var box = document.createElement("section");
-      box.className = "aisle" + (!bare && shut[sec.name] ? " shut" : "");
+      box.className = "aisle" + (collapsed ? " shut" : "");
 
-      var head = document.createElement(bare ? "div" : "button");
-      head.className = "ahead" + (bare ? " bare" : "");
-      if(!bare){
-        head.type = "button";
-        head.addEventListener("click", function(){ shut[sec.name] = !shut[sec.name]; lsSet(K_SHUT, shut); render(); });
-      }
-
-      var emo = document.createElement("span"); emo.className = "emo";
-      var mark = markFor(sec);
-      if(mark) emo.innerHTML = mark; else emo.textContent = sec.emoji || "\uD83D\uDED2";
-      var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = sec.name;
-      var ct = document.createElement("span"); ct.className = "ct";
-      var left = all.filter(function(x){ return !x.done; }).length;
-      ct.textContent = left ? String(left) : "";
-      head.appendChild(emo); head.appendChild(nm); head.appendChild(ct);
-      if(!bare){
-        var chev = document.createElement("span");
-        chev.className = "chev";
-        chev.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
-          + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
-          + 'stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
-        head.appendChild(chev);
-      }
-      box.appendChild(head);
-
-      var rows = document.createElement("div"); rows.className = "rows";
+      // rows first, so the header's add button can reach them
+      var rows = document.createElement("div");
+      rows.className = "rows";
+      rows.dataset.section = sec.name;
       list.forEach(function(it){
         var row = document.createElement("div");
         row.className = "row" + (it.done ? " done" : "");
@@ -892,19 +876,56 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         row.appendChild(tick); row.appendChild(name); row.appendChild(kill);
         rows.appendChild(row);
       });
-      var add = document.createElement("div");
-      add.className = "addrow";
-      add.dataset.section = sec.name;
-      var dot = document.createElement("span");
-      dot.className = "dot";
-      dot.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
-        + 'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" '
-        + 'aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
-      var lbl = document.createElement("span"); lbl.textContent = "P\u0159idat";
-      add.appendChild(dot); add.appendChild(lbl);
-      add.addEventListener("click", function(){ addInSection(sec.name, add); });
-      rows.appendChild(add);
 
+      var head = document.createElement("div");
+      head.className = "ahead" + (bare ? " bare" : "");
+
+      var toggleEl = document.createElement(bare ? "div" : "button");
+      toggleEl.className = "atoggle";
+      if(!bare){
+        toggleEl.type = "button";
+        toggleEl.addEventListener("click", function(){
+          shut[sec.name] = !shut[sec.name]; lsSet(K_SHUT, shut); render();
+        });
+      }
+      var emo = document.createElement("span"); emo.className = "emo";
+      var mark = markFor(sec);
+      if(mark) emo.innerHTML = mark; else emo.textContent = sec.emoji || "\uD83D\uDED2";
+      var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = sec.name;
+      toggleEl.appendChild(emo); toggleEl.appendChild(nm);
+      head.appendChild(toggleEl);
+
+      // the count is only worth showing when the items are out of sight;
+      // otherwise that slot is where you add one
+      if(collapsed){
+        var ct = document.createElement("span");
+        ct.className = "ct";
+        ct.textContent = String(all.filter(function(x){ return !x.done; }).length);
+        head.appendChild(ct);
+      } else {
+        var addBtn = document.createElement("button");
+        addBtn.className = "addbtn"; addBtn.type = "button";
+        addBtn.setAttribute("aria-label", "P\u0159idat do " + sec.name);
+        addBtn.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+          + 'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" '
+          + 'aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+        addBtn.addEventListener("click", function(e){
+          e.stopPropagation();
+          addInSection(sec.name, rows);
+        });
+        head.appendChild(addBtn);
+      }
+
+      if(!bare){
+        var chev = document.createElement("span");
+        chev.className = "chev";
+        chev.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+          + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
+          + 'stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
+        head.appendChild(chev);
+      }
+
+      box.appendChild(head);
       box.appendChild(rows);
       frag.appendChild(box);
     });
@@ -914,9 +935,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
     if(pendingAdd){
       var want = pendingAdd; pendingAdd = null;
-      var rowsAdd = elAisles.querySelectorAll(".addrow");
-      for(var q = 0; q < rowsAdd.length; q++){
-        if(rowsAdd[q].dataset.section === want){ addInSection(want, rowsAdd[q]); break; }
+      var conts = elAisles.querySelectorAll(".rows");
+      for(var q = 0; q < conts.length; q++){
+        if(conts[q].dataset.section === want){ addInSection(want, conts[q]); break; }
       }
     }
 
@@ -1124,7 +1145,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   // a manual item skips the model entirely; it still gets the capital and the
   // "- 3ks" shape, which are plain text rules and need no key
   var pendingAdd = null;
-  function addInSection(secName, rowEl){
+  function addInSection(secName, rowsEl){
     if(document.querySelector(".rows input.edit")) return;
     var input = document.createElement("input");
     input.className = "edit fresh";
@@ -1140,8 +1161,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     ghost.className = "tick ghost";
     row.appendChild(ghost);
     row.appendChild(input);
-    rowEl.replaceWith(row);
+    rowsEl.appendChild(row);
     input.focus();
+    row.scrollIntoView({ block: "nearest" });
 
     var settled = false;
     function finish(save, again){

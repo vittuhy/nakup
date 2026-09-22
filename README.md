@@ -76,8 +76,10 @@ time, so renaming does not change it.
 
 ## Adding by hand
 
-Every section ends with a slim "Přidat položku" row. Typing there skips the
-model entirely: no sorting, no duplicate check, no diacritics. The capital and
+Each section header carries a plus where its count sits — the count only shows
+when the section is collapsed and its items are out of sight. Tapping the plus
+opens a new row at the end of that section. Typing there skips the model
+entirely: no sorting, no duplicate check, no diacritics. The capital and
 the "- 3ks" shape still apply, since those are plain text rules and need no key.
 Enter saves and opens the next blank row, so several items can be typed in a
 row; Escape cancels.
