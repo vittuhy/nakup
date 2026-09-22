@@ -62,6 +62,8 @@ body{
 header.top{padding:22px 0 10px}
 .titlerow{display:flex; align-items:center; gap:10px}
 .titlerow h1{flex:1 1 auto; min-width:0}
+/* the title's ink sits ~3px below its line box, so box-centred controls read high */
+.titlerow .cog, .titlerow .sync{transform:translateY(3px)}
 h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
 .cog{background:none; border:0; padding:8px; margin-right:-8px; color:var(--ink-2); cursor:pointer; line-height:0; flex:0 0 auto; display:flex; align-items:center}
 .cog svg{display:block}
@@ -315,7 +317,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 11:57</span>
+      <span class="build">build 22.09. 12:00</span>
     </div>
   </div>
 
