@@ -59,7 +59,8 @@ header.top{padding:22px 0 10px}
 .titlerow{display:flex; align-items:center; gap:10px}
 .titlerow h1{flex:1 1 auto; min-width:0}
 h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
-.cog{background:none; border:0; padding:8px; margin-right:-8px; color:var(--ink-3); font-size:1.3rem; cursor:pointer; line-height:1; flex:0 0 auto}
+.cog{background:none; border:0; padding:8px; margin-right:-8px; color:var(--ink-2); cursor:pointer; line-height:0; flex:0 0 auto; display:flex; align-items:center}
+.cog svg{display:block}
 .subline{margin-top:3px; font-size:.86rem; color:var(--ink-2); display:flex; gap:7px; align-items:baseline; min-height:20px; flex-wrap:wrap}
 .subline button{background:none; border:0; padding:0; font:inherit; color:var(--accent); cursor:pointer}
 .subline .sep{color:var(--ink-3)}
@@ -113,8 +114,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .dock textarea:focus{border-color:var(--accent-solid)}
 .send{flex:0 0 auto; width:38px; height:38px; border-radius:50%; border:0; padding:0; background:var(--accent-solid); color:var(--on-accent); cursor:pointer; display:grid; place-items:center; font-size:1.3rem; font-weight:700; line-height:1}
 .send:disabled{opacity:.4; cursor:default}
-.send .spin{width:15px; height:15px; border-radius:50%; border:2px solid rgba(0,0,0,.28); border-top-color:currentColor; animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.send .ai{display:block}
+.send .ai path{fill:currentColor; transform-box:fill-box; transform-origin:center}
+.send .ai .s1{animation:twinkle 1.15s ease-in-out infinite}
+.send .ai .s2{animation:twinkle 1.15s ease-in-out .4s infinite}
+.send .ai .s3{animation:twinkle 1.15s ease-in-out .8s infinite}
+@keyframes twinkle{
+  0%,100%{opacity:.3; transform:scale(.6) rotate(0deg)}
+  50%    {opacity:1;  transform:scale(1)  rotate(45deg)}
+}
 .msg{max-width:620px; margin:0 auto; font-size:.8rem; color:var(--ink-2); padding:6px 2px 0; line-height:1.35}
 .msg[hidden]{display:none!important}
 .msg.err{color:#E5695F}
@@ -130,7 +138,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="titlerow">
       <h1>Nákup</h1>
       <span class="sync" id="sync"></span>
-      <button class="cog" id="cog" type="button" aria-label="Nastavení">&#9881;</button>
+      <button class="cog" id="cog" type="button" aria-label="Nastavení"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M19.1 14.3a1.5 1.5 0 0 0 .3 1.66l.06.05a1.83 1.83 0 1 1-2.59 2.59l-.05-.06a1.5 1.5 0 0 0-1.66-.3 1.5 1.5 0 0 0-.91 1.38v.15a1.83 1.83 0 0 1-3.66 0v-.08a1.5 1.5 0 0 0-.98-1.38 1.5 1.5 0 0 0-1.66.3l-.05.06a1.83 1.83 0 1 1-2.59-2.59l.06-.05a1.5 1.5 0 0 0 .3-1.66 1.5 1.5 0 0 0-1.38-.91h-.15a1.83 1.83 0 0 1 0-3.66h.08a1.5 1.5 0 0 0 1.38-.98 1.5 1.5 0 0 0-.3-1.66l-.06-.05a1.83 1.83 0 1 1 2.59-2.59l.05.06a1.5 1.5 0 0 0 1.66.3h.07a1.5 1.5 0 0 0 .91-1.38v-.15a1.83 1.83 0 0 1 3.66 0v.08a1.5 1.5 0 0 0 .91 1.38 1.5 1.5 0 0 0 1.66-.3l.05-.06a1.83 1.83 0 1 1 2.59 2.59l-.06.05a1.5 1.5 0 0 0-.3 1.66v.07a1.5 1.5 0 0 0 1.38.91h.15a1.83 1.83 0 0 1 0 3.66h-.08a1.5 1.5 0 0 0-1.38.91z"/></svg></button>
     </div>
     <div class="subline" id="subline"></div>
   </header>
@@ -636,7 +644,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     busy = on;
     elSend.disabled = on;
     elSend.textContent = "";
-    if(on){ var sp = document.createElement("span"); sp.className = "spin"; elSend.appendChild(sp); }
+    if(on){
+      elSend.innerHTML = '<svg class="ai" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">'
+        + '<path class="s1" d="M11 3.2l1.35 3.63L16 8.2l-3.65 1.37L11 13.2 9.65 9.57 6 8.2l3.65-1.37z"/>'
+        + '<path class="s2" d="M18.2 12.6l.72 1.94 1.95.72-1.95.72-.72 1.94-.72-1.94-1.95-.72 1.95-.72z"/>'
+        + '<path class="s3" d="M6.4 15.1l.55 1.47 1.48.55-1.48.55L6.4 19.14l-.55-1.47-1.48-.55 1.48-.55z"/>'
+        + '</svg>';
+    }
     else elSend.textContent = "+";
   }
 
@@ -651,7 +665,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     }
 
     setBusy(true);
-    if(!isErr()) say("Řadím do regálů…", "work");
+    if(!isErr()) say("");
 
     var result = null;
     try {
@@ -673,12 +687,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     setBusy(false);
     setTimeout(sizeDock, 120);
 
-    if(!isErr()){
-      var bits = [];
-      if(result.add.length) bits.push("Přidáno " + result.add.length);
-      if(result.skip.length) bits.push("už na seznamu: " + result.skip.join(", "));
-      say(bits.length ? bits.join(" · ") : "Nic k přidání.");
-    }
+    // success is silent — the list itself is the feedback
   }
 
   elSend.addEventListener("click", submit);
