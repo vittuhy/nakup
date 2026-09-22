@@ -73,3 +73,11 @@ Drawn marks (the dm swatch) are keyed by name.
 Tap the title to rename the list. The name is stored with everything else and
 travels through the gist. The home screen icon's label is fixed at install
 time, so renaming does not change it.
+
+## Adding by hand
+
+Every section ends with a slim "Přidat položku" row. Typing there skips the
+model entirely: no sorting, no duplicate check, no diacritics. The capital and
+the "- 3ks" shape still apply, since those are plain text rules and need no key.
+Enter saves and opens the next blank row, so several items can be typed in a
+row; Escape cancels.

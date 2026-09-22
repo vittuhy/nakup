@@ -80,7 +80,6 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
 .aisle{margin-top:16px}
 .aisle:first-child{margin-top:2px}
-.aisle:has(.ahead.bare){margin-top:0}
 .ahead{display:flex; align-items:center; gap:9px; width:100%; background:none; border:0; padding:8px 0; cursor:pointer; color:inherit; font:inherit; text-align:left}
 .ahead .emo{
   font-size:1.28rem; line-height:1; flex:0 0 auto;
@@ -96,7 +95,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .chev svg{display:block}
 .aisle.shut .chev{transform:rotate(-90deg)}
-.ahead.bare{cursor:default; padding:15px 0}
+.ahead.bare{cursor:default}
 .ahead.bare .nm, .ahead.bare .emo{opacity:.45}
 .aisle.shut .rows{display:none}
 
@@ -109,7 +108,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .row.done .tick{background:var(--accent-solid); border-color:var(--accent-solid)}
 .row.done .tick::after{border-color:var(--on-accent)}
 .name{flex:1; min-width:0; word-break:break-word; cursor:text}
-.row input.edit{
+.addrow{
+  display:flex; align-items:center; gap:13px; padding:6px 0 7px;
+  cursor:text; color:var(--ink-3); font-size:.92rem;
+}
+.addrow .dot{
+  flex:0 0 auto; width:18px; height:18px; border-radius:50%;
+  border:1.3px dashed var(--ring); opacity:.75;
+}
+.rows input.edit, .row input.edit{
   flex:1 1 auto; min-width:0; font:inherit; color:var(--ink);
   background:var(--bg-2); border:.5px solid var(--accent-solid);
   border-radius:9px; padding:5px 10px; margin:-6px 0; outline:none;
@@ -346,7 +353,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:34</span>
+      <span class="build">build 22.09. 13:36</span>
     </div>
   </div>
 
@@ -873,12 +880,29 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         row.appendChild(tick); row.appendChild(name); row.appendChild(kill);
         rows.appendChild(row);
       });
+      var add = document.createElement("div");
+      add.className = "addrow";
+      add.dataset.section = sec.name;
+      var dot = document.createElement("span"); dot.className = "dot";
+      var lbl = document.createElement("span"); lbl.textContent = "P\u0159idat polo\u017eku";
+      add.appendChild(dot); add.appendChild(lbl);
+      add.addEventListener("click", function(){ addInSection(sec.name, add); });
+      rows.appendChild(add);
+
       box.appendChild(rows);
       frag.appendChild(box);
     });
 
     elAisles.textContent = "";
     elAisles.appendChild(frag);
+
+    if(pendingAdd){
+      var want = pendingAdd; pendingAdd = null;
+      var rowsAdd = elAisles.querySelectorAll(".addrow");
+      for(var q = 0; q < rowsAdd.length; q++){
+        if(rowsAdd[q].dataset.section === want){ addInSection(want, rowsAdd[q]); break; }
+      }
+    }
 
     elAisles.hidden = settingsOpen;
     elEmpty.hidden = true;
@@ -1078,6 +1102,42 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     input.addEventListener("keydown", function(e){
       if(e.key === "Enter"){ e.preventDefault(); finish(true); }
       else if(e.key === "Escape"){ e.preventDefault(); finish(false); }
+    });
+  }
+
+  // a manual item skips the model entirely; it still gets the capital and the
+  // "- 3ks" shape, which are plain text rules and need no key
+  var pendingAdd = null;
+  function addInSection(secName, rowEl){
+    if(document.querySelector(".rows input.edit")) return;
+    var input = document.createElement("input");
+    input.className = "edit";
+    input.type = "text";
+    input.setAttribute("aria-label", "Nov\u00e1 polo\u017eka");
+    input.setAttribute("autocapitalize", "sentences");
+    input.setAttribute("spellcheck", "false");
+    rowEl.replaceWith(input);
+    input.focus();
+
+    var settled = false;
+    function finish(save, again){
+      if(settled) return;
+      settled = true;
+      var v = input.value.trim();
+      if(save && v){
+        items.push({
+          id: newId(), name: capFirst(normQty(v)),
+          section: secName, done: false, addedAt: Date.now()
+        });
+        persist();
+        if(again) pendingAdd = secName;
+      }
+      render();
+    }
+    input.addEventListener("blur", function(){ finish(true, false); });
+    input.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){ e.preventDefault(); finish(true, true); }
+      else if(e.key === "Escape"){ e.preventDefault(); finish(false, false); }
     });
   }
 
