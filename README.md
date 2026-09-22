@@ -46,8 +46,8 @@ the newer timestamp replaces the older one, so avoid editing on two devices at o
 
 Tapping the small sync label next to ⚙ forces a pull and push.
 
-## Colour
+## Look
 
-Eight pastels under ⚙. The choice rides along in the gist, so other devices
-pick it up on their next pull. Each theme carries a light and a dark variant
-and follows the phone's appearance setting.
+Seven pastels and an appearance switch (Auto / Light / Dark) under ⚙. Both ride
+along in the gist, so other devices adopt them on their next pull. Auto follows
+the phone; Light and Dark pin it regardless.
