@@ -101,7 +101,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .ahead .emo svg{display:block}
 .ahead .nm{font-size:1.26rem; font-weight:700; letter-spacing:-.02em; flex:1; min-width:0}
-.ahead .ct{font-size:.95rem; color:var(--ink-2); font-variant-numeric:tabular-nums; cursor:pointer}
+.ahead .ct{
+  flex:0 0 auto; width:28px; display:flex; align-items:center; justify-content:center;
+  font-size:.95rem; color:var(--ink-2); font-variant-numeric:tabular-nums; cursor:pointer;
+}
 .chev{
   flex:0 0 auto; width:28px; height:28px; color:var(--ink-2); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
@@ -109,6 +112,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .chev svg{display:block}
 .aisle.shut .chev{transform:rotate(-90deg)}
+.chev.ghost{visibility:hidden; cursor:default}
 .ahead.bare{cursor:default}
 .ahead.bare .nm, .ahead.bare .emo{opacity:.58}
 .aisle.shut .rows{display:none}
@@ -368,7 +372,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:56</span>
+      <span class="build">build 22.09. 13:59</span>
     </div>
   </div>
 
@@ -918,15 +922,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         head.appendChild(addBtn);
       }
 
-      if(!bare){
-        var chev = document.createElement("span");
-        chev.className = "chev";
-        chev.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
-          + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
-          + 'stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
-        chev.addEventListener("click", flip);
-        head.appendChild(chev);
-      }
+      // an empty section keeps the chevron's space, so the plus never jumps
+      // columns between one section and the next
+      var chev = document.createElement("span");
+      chev.className = "chev" + (bare ? " ghost" : "");
+      chev.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+        + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
+        + 'stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
+      if(!bare) chev.addEventListener("click", flip);
+      head.appendChild(chev);
 
       box.appendChild(head);
       box.appendChild(rows);
