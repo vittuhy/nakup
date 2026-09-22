@@ -97,6 +97,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .setup .kb{display:flex; gap:8px; margin-top:10px; align-items:stretch}
 .setup input{flex:1; min-width:0; font:inherit; font-size:16px; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:9px; padding:9px 12px; outline:none}
 .setup input:focus{border-color:var(--accent-solid)}
+.setup input::placeholder{font-size:13.5px; color:var(--ink-3)}
 .setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:15px; flex:0 0 auto}
 .setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
 .setup .blk + .blk{margin-top:16px; padding-top:16px; border-top:.5px solid var(--rule)}
@@ -838,8 +839,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     elTok.value = "";
     document.getElementById("dropKey").hidden = !getKey();
     document.getElementById("dropTok").hidden = !ghToken();
-    elKey.placeholder = getKey() ? "stored — paste a new one to replace" : "sk-…";
-    elTok.placeholder = ghToken() ? "stored — paste a new one to replace" : "github_pat_…";
+    elKey.placeholder = getKey() ? "stored · paste to replace" : "sk-…";
+    elTok.placeholder = ghToken() ? "stored · paste to replace" : "github_pat_…";
     elGinfo.textContent = "";
     if(ghToken() && gistId()){
       var a = document.createElement("a");
