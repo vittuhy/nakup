@@ -415,18 +415,27 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   function isErr(){ return elMsg.className.indexOf("err") !== -1 && !elMsg.hidden; }
 
-  // iOS moves the layout viewport when the keyboard opens and does not always
-  // put it back, which leaves a position:fixed shell offset against the visible
-  // area. Size the shell to the VISUAL viewport instead, on every change.
+  // CSS pins the shell to the viewport with inset:0, which is right whenever the
+  // keyboard is down — including at launch, where visualViewport briefly reports
+  // a short height that must NOT be locked in. Only while the keyboard is
+  // genuinely up do we size to the visual viewport instead, so the bar sits just
+  // above it; otherwise we clear the inline styles and let CSS own the layout.
   function sizeDock(){
     var vv = window.visualViewport;
-    if(!vv) return;
     var b = document.body.style;
-    b.bottom = "auto";
-    b.top = Math.max(0, vv.offsetTop) + "px";
-    b.height = vv.height + "px";
-    if(window.scrollY !== 0){ try { window.scrollTo(0, 0); } catch(e){} }
+    if(!vv){ return; }
+    var shrink = window.innerHeight - vv.height;
+    if(shrink > 120){
+      b.bottom = "auto";
+      b.top = Math.max(0, vv.offsetTop) + "px";
+      b.height = vv.height + "px";
+    } else {
+      b.top = "";
+      b.height = "";
+      b.bottom = "";
+    }
   }
+
   function sizeInput(){
     elInput.style.height = "auto";
     elInput.style.height = Math.min(elInput.scrollHeight, 132) + "px";
