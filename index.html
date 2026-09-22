@@ -50,7 +50,7 @@ body{
   font-size:17px; line-height:1.35; letter-spacing:-.01em;
   -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
-  position:fixed; inset:0;
+  height:100%;
   display:flex; flex-direction:column; overflow:hidden;
 }
 .scroll{
@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:11</span>
+      <span class="build">build 22.09. 13:03</span>
     </div>
   </div>
 
@@ -747,18 +747,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   // of an installed app (sometimes short, leaving a gap under the bar; sometimes
   // tall, pushing the bar off the bottom), so never trust one reading: re-apply
   // on every relevant event and keep re-measuring while the launch settles.
-  function sizeDock(){
-    var vv = window.visualViewport;
-    var b = document.body.style;
-    if(!vv){ b.top = ""; b.height = ""; b.bottom = ""; return; }
-    b.bottom = "auto";
-    b.top = Math.max(0, vv.offsetTop) + "px";
-    b.height = vv.height + "px";
-  }
-
-  function settleViewport(){
-    [0, 50, 150, 350, 700, 1200].forEach(function(t){ setTimeout(sizeDock, t); });
-  }
+  // Nothing to do: html and body are 100% tall and body is a flex column, so the
+  // dock is simply the last row. Driving this from visualViewport was the bug —
+  // positioning a fixed shell at vv.offsetTop while also giving it vv.height
+  // adds the offset twice and hangs the dock below the screen.
+  function sizeDock(){}
+  function settleViewport(){}
 
   function sizeInput(){
     elInput.style.height = "auto";
