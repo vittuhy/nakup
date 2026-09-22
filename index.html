@@ -112,12 +112,19 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .secrow:last-of-type{border-bottom:0}
 .secrow input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:8px; padding:7px 9px; outline:none; min-width:0}
 .secrow input:focus{border-color:var(--accent-solid)}
-.secrow input[readonly]{background:transparent; border-color:transparent; padding-left:2px}
-.secrow input[readonly]:focus{border-color:transparent}
+
 .secrow .emo-in{width:52px; text-align:center; flex:0 0 auto}
 .secrow .nm-in{flex:1 1 auto}
 .secrow button{border:0; background:none; color:var(--ink-3); cursor:pointer; padding:6px 3px; font-size:15px; line-height:1; flex:0 0 auto}
 .secrow button:disabled{opacity:.25; cursor:default}
+.secrow .grip{touch-action:none; cursor:grab; color:var(--ink-3); padding:8px 2px 8px 6px; line-height:0}
+.secrow .grip svg{display:block; pointer-events:none}
+.secrow.dragging{
+  background:var(--bg-2); border-radius:11px; border-bottom-color:transparent;
+  box-shadow:0 10px 26px rgba(0,0,0,.4); position:relative; z-index:5;
+  cursor:grabbing;
+}
+.secrow.dragging .grip{cursor:grabbing}
 .secrow .del{color:var(--ink-3); font-size:19px}
 .addsec{margin-top:12px; width:100%; border:.5px dashed var(--rule-2); background:none; color:var(--accent); font:inherit; font-size:15px; font-weight:600; padding:11px; border-radius:10px; cursor:pointer}
 .togglerow{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:12px}
@@ -212,7 +219,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   <div class="setup" id="setup" hidden>
     <div class="blk">
       <strong>Klíč OpenAI</strong>
-      Potřebný k řazení položek do regálů. Uložený jen v tomto prohlížeči, nikam jinam než do OpenAI se neposílá.
+      Uložený jen v tomto prohlížeči.
       <div class="kb">
         <input id="key" name="openai-key" type="password" placeholder="sk-…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
         <button class="save" id="saveKey" type="button">Uložit</button>
@@ -221,9 +228,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     </div>
     <div class="blk">
       <strong>Synchronizace s GitHubem</strong>
-      Volitelné. Seznam se ukládá do soukromého Gistu, takže přežije vymazání dat
-      v Safari a objeví se i na dalších zařízeních. Potřebuje token s oprávněním
-      <em>Gists: read and write</em>.
+      Zálohuje seznam a sdílí ho mezi zařízeními. Token s právem <em>Gists: read and write</em>.
       <div class="kb">
         <input id="tok" name="github-token" type="password" placeholder="github_pat_…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
         <button class="save" id="saveTok" type="button">Uložit</button>
@@ -242,6 +247,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       Pořadí odpovídá tomu, jak procházíš obchod. Putuje se seznamem.
       <div id="seclist"></div>
       <button class="addsec" id="addsec" type="button">+ Přidat regál</button>
+      <button class="drop" id="resetsec" type="button">Obnovit výchozí regály</button>
     </div>
     <div class="blk">
       <strong>Prázdné regály</strong>
@@ -263,7 +269,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   <div class="empty" id="empty" hidden>
     <strong>Seznam je prázdný</strong>
-    Něco přidej níž.
+    Přidej svou první položku níže.
   </div>
 
   <div id="aisles"></div>
@@ -302,7 +308,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var SECTIONS = DEFAULT_SECTIONS.slice();
   var BUILTIN = {};
   var FALLBACK = "Ostatní";
-  var K_SECT = "nakup.sections";
+  var K_SECT = "nakup.sections", K_SECTAT = "nakup.sectionsat";
 
   var THEMES = [
     { id: "coral",   label: "Korálová",   deep: "#C1452C", pastel: "#FF8A73", ink: "#3B0F07" },
@@ -368,20 +374,27 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
                   .map(function(x){ return { name: String(x.name), emoji: String(x.emoji || "") }; });
     }
     if(!SECTIONS.length) SECTIONS = DEFAULT_SECTIONS.slice();
-    // a built-in aisle can never go missing, however the stored list was edited
-    var have = {};
-    SECTIONS.forEach(function(x){ have[norm(x.name)] = true; });
-    DEFAULT_SECTIONS.forEach(function(d){
-      if(!have[norm(d.name)]) SECTIONS.push({ name: d.name, emoji: d.emoji });
-    });
     rebuildIndex();
+  }
+  function sectionsAt(){
+    try { return Number(localStorage.getItem(K_SECTAT)) || 0; } catch(e){ return 0; }
+  }
+  function touchSections(){
+    try { localStorage.setItem(K_SECTAT, String(Date.now())); } catch(e){}
+  }
+  function nameTaken(name, skipIndex){
+    var n = norm(name);
+    for(var i = 0; i < SECTIONS.length; i++){
+      if(i !== skipIndex && norm(SECTIONS[i].name) === n) return true;
+    }
+    return false;
   }
   function saveSections(push){
     lsSet(K_SECT, SECTIONS);
     rebuildIndex();
     renderSections();
     render();
-    if(push){ setStamp(Date.now()); scheduleSync(); }
+    if(push){ touchSections(); setStamp(Date.now()); scheduleSync(); }
   }
 
   function renderSections(){
@@ -401,17 +414,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         saveSections(true);
       });
 
-      var fixed = isBuiltin(sec);
-
       var nm = document.createElement("input");
       nm.className = "nm-in";
       nm.value = sec.name;
       nm.setAttribute("aria-label", "N\u00e1zev reg\u00e1lu");
-      if(fixed) nm.readOnly = true;
       nm.addEventListener("change", function(){
-        if(fixed){ nm.value = sec.name; return; }
         var v = nm.value.trim();
-        if(!v){ nm.value = sec.name; return; }
+        if(!v || nameTaken(v, i)){ nm.value = SECTIONS[i].name; return; }
         var old = SECTIONS[i].name;
         SECTIONS[i].name = v;
         // carry the items across so a rename does not strand them
@@ -420,30 +429,21 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         saveSections(true);
       });
 
-      var up = document.createElement("button");
-      up.type = "button"; up.textContent = "\u25b2";
-      up.disabled = i === 0;
-      up.setAttribute("aria-label", "Nahoru");
-      up.addEventListener("click", function(){
-        var t = SECTIONS[i]; SECTIONS[i] = SECTIONS[i - 1]; SECTIONS[i - 1] = t;
-        saveSections(true);
-      });
-
-      var dn = document.createElement("button");
-      dn.type = "button"; dn.textContent = "\u25bc";
-      dn.disabled = i === SECTIONS.length - 1;
-      dn.setAttribute("aria-label", "Dol\u016f");
-      dn.addEventListener("click", function(){
-        var t = SECTIONS[i]; SECTIONS[i] = SECTIONS[i + 1]; SECTIONS[i + 1] = t;
-        saveSections(true);
-      });
+      var grip = document.createElement("button");
+      grip.className = "grip";
+      grip.type = "button";
+      grip.setAttribute("aria-label", "P\u0159esunout");
+      grip.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" '
+        + 'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">'
+        + '<path d="M5 8h14M5 12h14M5 16h14"/></svg>';
+      grip.addEventListener("pointerdown", function(e){ beginDrag(e, row); });
 
       var del = document.createElement("button");
       del.className = "del"; del.type = "button"; del.textContent = "\u00d7";
-      del.disabled = fixed;
+      del.disabled = SECTIONS.length < 2;
       del.setAttribute("aria-label", "Smazat reg\u00e1l");
       del.addEventListener("click", function(){
-        if(fixed) return;
+        if(SECTIONS.length < 2) return;
         var gone = SECTIONS[i].name;
         SECTIONS.splice(i, 1);
         rebuildIndex();
@@ -453,10 +453,79 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         saveSections(true);
       });
 
-      row.appendChild(emo); row.appendChild(nm);
-      row.appendChild(up); row.appendChild(dn); row.appendChild(del);
+      row.dataset.idx = String(i);
+      row.appendChild(grip); row.appendChild(emo); row.appendChild(nm); row.appendChild(del);
       elSecList.appendChild(row);
     });
+  }
+
+  // pointer-based reordering: HTML5 drag and drop does not work on touch,
+  // so the row follows the finger and swaps with whichever neighbour it crosses
+  var drag = null;
+
+  function beginDrag(e, row){
+    if(e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    drag = { row: row, startY: e.clientY, id: e.pointerId };
+    row.classList.add("dragging");
+    try { e.target.setPointerCapture(e.pointerId); } catch(err){}
+    window.addEventListener("pointermove", onDragMove);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+  }
+
+  function onDragMove(e){
+    if(!drag) return;
+    e.preventDefault();
+    var row = drag.row;
+    row.style.transform = "translateY(" + (e.clientY - drag.startY) + "px)";
+
+    var mid = row.getBoundingClientRect();
+    var centre = mid.top + mid.height / 2;
+    var sibs = [];
+    for(var i = 0; i < elSecList.children.length; i++){
+      if(elSecList.children[i] !== row) sibs.push(elSecList.children[i]);
+    }
+    for(var j = 0; j < sibs.length; j++){
+      var r = sibs[j].getBoundingClientRect();
+      if(centre < r.top + r.height / 2){
+        if(sibs[j].previousSibling !== row){
+          elSecList.insertBefore(row, sibs[j]);
+          drag.startY = e.clientY;
+          row.style.transform = "";
+        }
+        return;
+      }
+    }
+    if(elSecList.lastChild !== row){
+      elSecList.appendChild(row);
+      drag.startY = e.clientY;
+      row.style.transform = "";
+    }
+  }
+
+  function endDrag(){
+    if(!drag) return;
+    var row = drag.row;
+    row.classList.remove("dragging");
+    row.style.transform = "";
+    window.removeEventListener("pointermove", onDragMove);
+    window.removeEventListener("pointerup", endDrag);
+    window.removeEventListener("pointercancel", endDrag);
+    drag = null;
+
+    var order = [];
+    for(var i = 0; i < elSecList.children.length; i++){
+      var k = Number(elSecList.children[i].dataset.idx);
+      if(SECTIONS[k]) order.push(SECTIONS[k]);
+    }
+    if(order.length === SECTIONS.length){
+      var changed = order.some(function(x, i){ return x !== SECTIONS[i]; });
+      SECTIONS = order;
+      if(changed) saveSections(true); else renderSections();
+    } else {
+      renderSections();
+    }
   }
 
   function showEmpty(){
@@ -552,7 +621,6 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     SECTIONS.forEach(function(x){ BY_NORM[norm(x.name)] = x.name; });
     FALLBACK = fallbackName();
   }
-  function isBuiltin(sec){ return !!BUILTIN[norm(sec.name)]; }
   function fallbackName(){
     for(var i = 0; i < SECTIONS.length; i++){
       if(norm(SECTIONS[i].name) === "ostatn\u00ed") return SECTIONS[i].name;
@@ -776,7 +844,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     setSync("ukládám\u2026");
     try {
       var body = JSON.stringify({ updatedAt: localStamp(), theme: themeId(), mode: modeId(),
-        showEmpty: showEmpty(), sections: SECTIONS, items: items });
+        showEmpty: showEmpty(), sections: SECTIONS, sectionsAt: sectionsAt(), items: items });
       var id = gistId(), res;
       if(id){
         res = await ghFetch("https://api.github.com/gists/" + id, {
@@ -829,10 +897,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
               try { localStorage.setItem(K_MODE, remote.mode); } catch(e){}
               look = true;
             }
-            if(Array.isArray(remote.sections) && remote.sections.length){
+            if(Array.isArray(remote.sections) && remote.sections.length
+               && (Number(remote.sectionsAt) || 0) >= sectionsAt()){
               SECTIONS = remote.sections.filter(function(x){ return x && x.name; })
                 .map(function(x){ return { name: String(x.name), emoji: String(x.emoji || "") }; });
               lsSet(K_SECT, SECTIONS);
+              try { localStorage.setItem(K_SECTAT, String(Number(remote.sectionsAt) || 0)); } catch(e){}
               rebuildIndex();
               renderSections();
             }
@@ -878,6 +948,40 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     };
   }
 
+  // only describe aisles that still exist, so renaming or deleting one
+  // cannot leave the model chasing a section that is gone
+  var HINTS = [
+    ["Drogerie a dom\u00e1cnost", "soap, shampoo, toothpaste, cleaning, paper goods"],
+    ["Trvanliv\u00e9",            "tinned, jarred, dried, packaged food, pasta, rice, flour"],
+    ["Uzeniny a lah\u016fdky",    "salami, ham, sausage, deli"],
+    ["Maso",                  "fresh meat, poultry, fish"],
+    ["Pe\u010divo",               "bread, rolls, pastries"],
+    ["Ml\u00e9\u010dn\u00e9 a chlazen\u00e9",   "milk, yoghurt, cheese, butter, eggs, chilled"],
+    ["N\u00e1poje",               "all drinks incl. beer, wine, coffee, tea"]
+  ];
+
+  function hintLines(){
+    var out = [];
+    HINTS.forEach(function(h){
+      if(BY_NORM[norm(h[0])]) out.push("- " + h[1] + " -> " + BY_NORM[norm(h[0])]);
+    });
+    var dm = BY_NORM[norm("DM drogerie")];
+    var drog = BY_NORM[norm("Drogerie a dom\u00e1cnost")];
+    if(dm){
+      out.push("");
+      out.push("The word \"dm\" is a MARKER, never a shopping item. It attaches to the item");
+      out.push("next to it - normally the one immediately before it. When the marked item is");
+      out.push("a drugstore product (toiletries, cleaning, paper goods, cosmetics, baby care),");
+      out.push("put that item in \"" + dm + "\"" + (drog ? " instead of \"" + drog + "\"" : "") + ".");
+      out.push("An item with no marker keeps its normal section even if it is a drugstore product.");
+      if(drog){
+        out.push("Example: \"toaletni papir dm klobasy mydlo sampon dm\" ->");
+        out.push("  toaletn\u00ed pap\u00edr = " + dm + ", mydlo = " + drog + ", \u0161ampon = " + dm);
+      }
+    }
+    return out;
+  }
+
   function systemPrompt(){
     return [
       "You sort groceries into fixed supermarket aisle sections for a Czech shopper.",
@@ -907,28 +1011,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "characters: \"mliko\" = \"mleko\", \"tomatoes\" = \"rajcata\", singular = plural. Ignore",
       "quantity when matching, unless the new item is a clearly different variant.",
       "",
-      "Assign every added item to exactly one SECTION:",
-      "- soap, shampoo, toothpaste, cleaning, paper goods -> Drogerie a domácnost",
-      "- tinned, jarred, dried, packaged food, pasta, rice, flour -> Trvanlivé",
-      "- salami, ham, sausage, deli -> Uzeniny a lahůdky",
-      "- fresh meat, poultry, fish -> Maso",
-      "- bread, rolls, pastries -> Pečivo",
-      "- milk, yoghurt, cheese, butter, eggs, chilled -> Mléčné a chlazené",
-      "- all drinks incl. beer, wine, coffee, tea -> Nápoje",
-      "",
-      "The word \"dm\" is a MARKER, never a shopping item. It attaches to the item",
-      "next to it - normally the one immediately before it. When the marked item is",
-      "a drugstore product (toiletries, cleaning, paper goods, cosmetics, baby care),",
-      "put that item in \"DM drogerie\" instead of \"Drogerie a domácnost\". An item",
-      "with no marker keeps its normal section even if it is a drugstore product.",
-      "Example: \"toaletni papir dm klobasy mydlo sampon dm\" ->",
-      "  toaletní papír = DM drogerie, klobásy = Uzeniny a lahůdky,",
-      "  mydlo = Drogerie a domácnost, šampon = DM drogerie",
+      "Assign every added item to exactly one SECTION:"
+    ].concat(hintLines()).concat([
       "\"" + FALLBACK + "\" is a last resort - re-read the sections before using it.",
       "",
       "Reply with JSON only, this shape:",
-      "{\"add\":[{\"section\":\"Pečivo\",\"name\":\"rohlíky 6 ks\"}],\"skip\":[\"mléko\"]}"
-    ].join("\n");
+      "{\"add\":[{\"section\":\"" + SECTIONS[0].name + "\",\"name\":\"Rohlíky 6 ks\"}],\"skip\":[\"Mléko\"]}"
+    ]).join("\n");
   }
 
   function userMsg(raw){
@@ -1095,9 +1184,22 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   if(elEmptyT) elEmptyT.addEventListener("click", function(){ setShowEmpty(!showEmpty()); });
 
+  var elResetSec = document.getElementById("resetsec");
+  if(elResetSec) elResetSec.addEventListener("click", function(){
+    SECTIONS = DEFAULT_SECTIONS.map(function(d){ return { name: d.name, emoji: d.emoji }; });
+    rebuildIndex();
+    // anything that lived in an aisle the defaults do not have lands in the fallback
+    items.forEach(function(it){ it.section = resolveSection(it.section); });
+    persist();
+    saveSections(true);
+    say("V\u00fdchoz\u00ed regály obnoveny.");
+  });
+
   var elAddSec = document.getElementById("addsec");
   if(elAddSec) elAddSec.addEventListener("click", function(){
-    SECTIONS.push({ name: "Nov\u00fd reg\u00e1l", emoji: "\uD83D\uDED2" });
+    var base = "Nov\u00fd reg\u00e1l", name = base, n = 2;
+    while(nameTaken(name, -1)) name = base + " " + (n++);
+    SECTIONS.push({ name: name, emoji: "\uD83D\uDED2" });
     saveSections(true);
     var rows = elSecList.querySelectorAll(".nm-in");
     var last = rows[rows.length - 1];

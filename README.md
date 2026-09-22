@@ -54,15 +54,16 @@ the phone; Light and Dark pin it regardless.
 
 ## Aisles
 
-The array in `index.html` seeds a fresh install. Once the gist carries a list,
-that list is authoritative everywhere — merging the two would be ambiguous the
-moment an aisle is renamed.
+The array in `index.html` seeds a first run only. Everything is editable after
+that — rename, add, delete, drag to reorder — and the gist holds the whole list.
+A button restores the defaults.
 
-Built-in aisles cannot be renamed or deleted, and are re-added if they ever go
-missing from the stored list. Aisles you add yourself can be renamed and
-deleted; deleting one moves its items to the fallback. Order is free for all of
-them and is the walking order.
+Sections carry their own timestamp, separate from the items'. A fresh install
+starts at 0 and therefore always yields to the gist, so adding one item on a new
+device can never push its stock aisle list over a customised one.
 
-The fallback is the aisle named *Ostatní*, or the last one if that is gone.
-Drawn marks (the dm swatch) are keyed by name, so they survive the round trip
-through the gist.
+Renaming an aisle carries its items across; deleting one moves them to the
+fallback. Duplicate and empty names are refused, and the last aisle cannot be
+deleted. The fallback is the aisle named *Ostatní*, or the last one if it is
+gone. Category hints given to the model are filtered to aisles that still exist.
+Drawn marks (the dm swatch) are keyed by name.
