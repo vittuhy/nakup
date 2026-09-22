@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:12</span>
+      <span class="build">build 22.09. 13:13</span>
     </div>
   </div>
 
@@ -754,14 +754,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   // The layout is CSS's job now. The one thing left to undo is iOS scrolling the
   // page to reveal the focused field and not scrolling it back when the keyboard
   // goes — which leaves the whole shell sitting a little high.
-  function sizeDock(){
-    if(window.scrollY) { try { window.scrollTo(0, 0); } catch(e){} }
-    if(document.documentElement.scrollTop) document.documentElement.scrollTop = 0;
-    if(document.body.scrollTop) document.body.scrollTop = 0;
-  }
-  function settleViewport(){
-    [60, 200, 450].forEach(function(t){ setTimeout(sizeDock, t); });
-  }
+  // Layout is entirely CSS. Touching scroll or size from script made the launch
+  // position worse, so these stay empty.
+  function sizeDock(){}
+  function settleViewport(){}
 
   function sizeInput(){
     elInput.style.height = "auto";
@@ -1413,12 +1409,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     if(!document.hidden) settleViewport();
   });
   if(window.visualViewport){
-    window.visualViewport.addEventListener("resize", function(){
-      // the keyboard has gone once the viewport is full height again
-      if(window.visualViewport.height >= window.innerHeight - 2) settleViewport();
-    });
+    window.visualViewport.addEventListener("resize", sizeDock);
   }
-  elInput.addEventListener("blur", settleViewport);
 
   if(!getKey()) showSettings(true);
 
