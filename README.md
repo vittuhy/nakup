@@ -33,3 +33,15 @@ store-walking order. Section matching ignores case, spacing and `&` vs `a`, so
 renaming one does not strand existing items.
 
 `MODEL` on the next line sets the OpenAI model.
+
+## Sync (optional)
+
+Paste a GitHub token with **Gists: read and write** into the ⚙ panel. The list is
+then kept in a private Gist: it survives Safari clearing its storage, and the same
+list appears on any device where you paste the same token.
+
+The gist is created on the first change. Writes are debounced; the app pulls on
+launch and whenever it returns to the foreground. Last write wins — the copy with
+the newer timestamp replaces the older one, so avoid editing on two devices at once.
+
+Tapping the small sync label next to ⚙ forces a pull and push.

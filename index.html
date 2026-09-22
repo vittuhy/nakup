@@ -55,7 +55,8 @@ body{
 .wrap{max-width:620px; margin:0 auto}
 
 header.top{padding:22px 0 10px}
-.titlerow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.titlerow{display:flex; align-items:center; gap:10px}
+.titlerow h1{flex:1 1 auto; min-width:0}
 h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
 .cog{background:none; border:0; padding:8px; margin-right:-8px; color:var(--ink-3); font-size:1.3rem; cursor:pointer; line-height:1; flex:0 0 auto}
 .subline{margin-top:3px; font-size:.86rem; color:var(--ink-2); display:flex; gap:7px; align-items:baseline; min-height:20px; flex-wrap:wrap}
@@ -94,6 +95,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .setup input:focus{border-color:var(--accent-solid)}
 .setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:.9rem}
 .setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
+.setup .blk + .blk{margin-top:16px; padding-top:16px; border-top:.5px solid var(--rule)}
+.setup .ginfo{margin-top:8px; font-size:.8rem; color:var(--ink-3); word-break:break-all}
+.setup .ginfo a{color:var(--accent)}
+.sync{font-size:.72rem; color:var(--ink-3); cursor:pointer; padding:8px 2px; white-space:nowrap}
+.sync.bad{color:#E5695F}
 
 .dock{flex:0 0 auto; z-index:30; background:var(--sheet); -webkit-backdrop-filter:saturate(180%) blur(22px); backdrop-filter:saturate(180%) blur(22px); border-top:.5px solid var(--rule); padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px))}
 .dock-in{max-width:620px; margin:0 auto; display:flex; align-items:flex-end; gap:10px}
@@ -118,19 +124,34 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   <header class="top">
     <div class="titlerow">
       <h1>Nákup</h1>
+      <span class="sync" id="sync"></span>
       <button class="cog" id="cog" type="button" aria-label="Nastavení">&#9881;</button>
     </div>
     <div class="subline" id="subline"></div>
   </header>
 
   <div class="setup" id="setup" hidden>
-    <strong>OpenAI key</strong>
-    Needed to sort items into aisles. Stored only in this browser, never sent anywhere but OpenAI.
-    <div class="kb">
-      <input id="key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <button class="save" id="saveKey" type="button">Save</button>
+    <div class="blk">
+      <strong>OpenAI key</strong>
+      Needed to sort items into aisles. Stored only in this browser, never sent anywhere but OpenAI.
+      <div class="kb">
+        <input id="key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <button class="save" id="saveKey" type="button">Save</button>
+      </div>
+      <button class="drop" id="dropKey" type="button" hidden>Remove stored key</button>
     </div>
-    <button class="drop" id="dropKey" type="button" hidden>Remove stored key</button>
+    <div class="blk">
+      <strong>GitHub sync</strong>
+      Optional. Keeps the list in a private Gist, so it survives Safari clearing
+      its storage and shows up on your other devices. Needs a fine-grained token
+      with <em>Gists: read and write</em>.
+      <div class="kb">
+        <input id="tok" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <button class="save" id="saveTok" type="button">Save</button>
+      </div>
+      <div class="ginfo" id="ginfo"></div>
+      <button class="drop" id="dropTok" type="button" hidden>Disconnect sync</button>
+    </div>
   </div>
 
   <div class="empty" id="empty" hidden>
@@ -169,6 +190,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var FALLBACK = "Ostatní";
   var MODEL = "gpt-4.1-mini";
   var K_ITEMS = "nakup.items", K_SHUT = "nakup.shut", K_DONE = "nakup.showdone", K_KEY = "nakup.key";
+  var K_TOK = "nakup.ghtoken", K_GIST = "nakup.gistid", K_STAMP = "nakup.updated";
+  var GIST_FILE = "nakup.json";
 
   var items = [], shut = {}, showDone = true, busy = false;
 
@@ -180,6 +203,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var elMsg    = document.getElementById("msg");
   var elDock   = document.querySelector(".dock");
   var elSetup  = document.getElementById("setup");
+  var elSync   = document.getElementById("sync");
+  var elTok    = document.getElementById("tok");
+  var elGinfo  = document.getElementById("ginfo");
   var elKey    = document.getElementById("key");
   var elCog    = document.getElementById("cog");
 
@@ -303,7 +329,95 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   }
 
   function newId(){ return "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-  function persist(){ lsSet(K_ITEMS, items); }
+
+  function ghToken(){ try { return localStorage.getItem(K_TOK) || ""; } catch(e){ return ""; } }
+  function gistId(){ try { return localStorage.getItem(K_GIST) || ""; } catch(e){ return ""; } }
+  function localStamp(){ try { return Number(localStorage.getItem(K_STAMP)) || 0; } catch(e){ return 0; } }
+  function setStamp(v){ try { localStorage.setItem(K_STAMP, String(v)); } catch(e){} }
+
+  function setSync(text, bad){
+    elSync.textContent = text || "";
+    elSync.className = "sync" + (bad ? " bad" : "");
+  }
+
+  function ghFetch(url, opts){
+    opts = opts || {};
+    opts.headers = Object.assign({
+      "Authorization": "Bearer " + ghToken(),
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28"
+    }, opts.headers || {});
+    return fetch(url, opts);
+  }
+
+  function gistFiles(body){ var f = {}; f[GIST_FILE] = { content: body }; return f; }
+
+  var syncTimer = null, syncing = false;
+
+  function scheduleSync(){
+    if(!ghToken()) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncPush, 1200);
+  }
+
+  async function syncPush(){
+    if(!ghToken() || syncing) return;
+    syncing = true;
+    setSync("saving\u2026");
+    try {
+      var body = JSON.stringify({ updatedAt: localStamp(), items: items });
+      var id = gistId(), res;
+      if(id){
+        res = await ghFetch("https://api.github.com/gists/" + id, {
+          method: "PATCH",
+          body: JSON.stringify({ files: gistFiles(body) })
+        });
+      } else {
+        res = await ghFetch("https://api.github.com/gists", {
+          method: "POST",
+          body: JSON.stringify({ description: "N\u00e1kup", public: false, files: gistFiles(body) })
+        });
+      }
+      if(!res.ok) throw new Error("http " + res.status);
+      var data = await res.json();
+      if(!id && data.id){ try { localStorage.setItem(K_GIST, data.id); } catch(e){} }
+      setSync("synced");
+      setTimeout(function(){ if(elSync.textContent === "synced") setSync(""); }, 2500);
+    } catch(e){
+      setSync("sync failed", true);
+    }
+    syncing = false;
+  }
+
+  async function syncPull(){
+    if(!ghToken() || !gistId() || syncing) return;
+    syncing = true;
+    try {
+      var res = await ghFetch("https://api.github.com/gists/" + gistId());
+      if(!res.ok) throw new Error("http " + res.status);
+      var data = await res.json();
+      var f = data.files && data.files[GIST_FILE];
+      if(f && f.content){
+        var remote = JSON.parse(f.content);
+        if(remote && Array.isArray(remote.items) && (remote.updatedAt || 0) > localStamp()){
+          items = remote.items;
+          lsSet(K_ITEMS, items);
+          setStamp(remote.updatedAt);
+          render();
+        }
+      }
+      setSync("");
+    } catch(e){
+      setSync("sync failed", true);
+    }
+    syncing = false;
+  }
+
+  function persist(){
+    lsSet(K_ITEMS, items);
+    setStamp(Date.now());
+    scheduleSync();
+  }
 
   function toggle(it){ it.done = !it.done; persist(); render(); }
   function remove(it){ items = items.filter(function(x){ return x.id !== it.id; }); persist(); render(); }
@@ -465,14 +579,53 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){ e.preventDefault(); submit(); }
   });
 
+  function refreshSetup(){
+    elKey.value = "";
+    elTok.value = "";
+    document.getElementById("dropKey").hidden = !getKey();
+    document.getElementById("dropTok").hidden = !ghToken();
+    elKey.placeholder = getKey() ? "stored — paste a new one to replace" : "sk-…";
+    elTok.placeholder = ghToken() ? "stored — paste a new one to replace" : "github_pat_…";
+    elGinfo.textContent = "";
+    if(ghToken() && gistId()){
+      var a = document.createElement("a");
+      a.href = "https://gist.github.com/" + gistId();
+      a.target = "_blank"; a.rel = "noopener";
+      a.textContent = "gist " + gistId().slice(0, 8);
+      elGinfo.appendChild(document.createTextNode("Syncing to "));
+      elGinfo.appendChild(a);
+    } else if(ghToken()){
+      elGinfo.textContent = "A gist will be created on the next change.";
+    }
+  }
+
   elCog.addEventListener("click", function(){
     elSetup.hidden = !elSetup.hidden;
-    if(!elSetup.hidden){
-      elKey.value = "";
-      document.getElementById("dropKey").hidden = !getKey();
-      elKey.placeholder = getKey() ? "key stored — paste a new one to replace" : "sk-…";
-    }
+    if(!elSetup.hidden) refreshSetup();
   });
+
+  document.getElementById("saveTok").addEventListener("click", async function(){
+    var v = elTok.value.trim();
+    if(!v){ say("Nothing to save.", "err"); return; }
+    try { localStorage.setItem(K_TOK, v); } catch(e){}
+    elTok.value = "";
+    say("Token saved — checking…", "work");
+    if(gistId()) await syncPull();
+    setStamp(Date.now());
+    await syncPush();
+    refreshSetup();
+    var ok = elSync.className.indexOf("bad") === -1;
+    say(ok ? "Sync is on." : "GitHub rejected that token.", ok ? null : "err");
+  });
+
+  document.getElementById("dropTok").addEventListener("click", function(){
+    try { localStorage.removeItem(K_TOK); localStorage.removeItem(K_GIST); } catch(e){}
+    setSync("");
+    refreshSetup();
+    say("Sync off. The gist itself is untouched.");
+  });
+
+  elSync.addEventListener("click", function(){ syncPull().then(syncPush); });
   document.getElementById("saveKey").addEventListener("click", function(){
     var v = elKey.value.trim();
     if(!v){ say("Nothing to save.", "err"); return; }
@@ -499,6 +652,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   if(window.visualViewport) window.visualViewport.addEventListener("resize", sizeDock);
 
   if(!getKey()) elSetup.hidden = false;
+
+  if(ghToken()){
+    syncPull();
+    document.addEventListener("visibilitychange", function(){
+      if(!document.hidden) syncPull();
+    });
+  }
 
   try {
     var incoming = new URLSearchParams(location.search).get("add");
