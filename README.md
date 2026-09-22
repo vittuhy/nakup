@@ -51,3 +51,18 @@ Tapping the small sync label next to ⚙ forces a pull and push.
 Seven pastels and an appearance switch (Auto / Light / Dark) under ⚙. Both ride
 along in the gist, so other devices adopt them on their next pull. Auto follows
 the phone; Light and Dark pin it regardless.
+
+## Aisles
+
+The array in `index.html` seeds a fresh install. Once the gist carries a list,
+that list is authoritative everywhere — merging the two would be ambiguous the
+moment an aisle is renamed.
+
+Built-in aisles cannot be renamed or deleted, and are re-added if they ever go
+missing from the stored list. Aisles you add yourself can be renamed and
+deleted; deleting one moves its items to the fallback. Order is free for all of
+them and is the walking order.
+
+The fallback is the aisle named *Ostatní*, or the last one if that is gone.
+Drawn marks (the dm swatch) are keyed by name, so they survive the round trip
+through the gist.

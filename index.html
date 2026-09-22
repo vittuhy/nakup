@@ -108,6 +108,31 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .credit .who{display:block; color:var(--ink-2); font-weight:500; letter-spacing:.01em}
 .swatches{display:flex; flex-wrap:wrap; gap:11px; margin-top:12px}
+.secrow{display:flex; align-items:center; gap:7px; padding:7px 0; border-bottom:.5px solid var(--rule)}
+.secrow:last-of-type{border-bottom:0}
+.secrow input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:8px; padding:7px 9px; outline:none; min-width:0}
+.secrow input:focus{border-color:var(--accent-solid)}
+.secrow input[readonly]{background:transparent; border-color:transparent; padding-left:2px}
+.secrow input[readonly]:focus{border-color:transparent}
+.secrow .emo-in{width:52px; text-align:center; flex:0 0 auto}
+.secrow .nm-in{flex:1 1 auto}
+.secrow button{border:0; background:none; color:var(--ink-3); cursor:pointer; padding:6px 3px; font-size:15px; line-height:1; flex:0 0 auto}
+.secrow button:disabled{opacity:.25; cursor:default}
+.secrow .del{color:var(--ink-3); font-size:19px}
+.addsec{margin-top:12px; width:100%; border:.5px dashed var(--rule-2); background:none; color:var(--accent); font:inherit; font-size:15px; font-weight:600; padding:11px; border-radius:10px; cursor:pointer}
+.togglerow{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:12px}
+.togglerow span{font-size:.88rem; color:var(--ink-2); line-height:1.4}
+.swt{
+  width:51px; height:31px; border-radius:16px; border:0; padding:0; flex:0 0 auto;
+  background:var(--ring); cursor:pointer; position:relative; transition:background .22s ease;
+}
+.swt::after{
+  content:""; position:absolute; top:2px; left:2px; width:27px; height:27px;
+  border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3);
+  transition:transform .22s cubic-bezier(.3,.8,.3,1);
+}
+.swt[aria-checked="true"]{background:var(--accent-solid)}
+.swt[aria-checked="true"]::after{transform:translateX(20px)}
 .seg{display:flex; margin-top:12px; background:var(--bg); border:.5px solid var(--rule); border-radius:11px; padding:3px; gap:3px}
 .seg button{flex:1 1 0; border:0; background:none; color:var(--ink-2); font:inherit; font-size:15px; font-weight:500; padding:9px 4px; border-radius:8px; cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent-solid); color:var(--on-accent); font-weight:600}
@@ -179,53 +204,66 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="titlerow">
       <h1>Nákup</h1>
       <span class="sync" id="sync"></span>
-      <button class="cog" id="cog" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M10.25 5.69 L9.94 3.08 L14.06 3.08 L13.75 5.69 L15.23 6.30 L16.85 4.24 L19.76 7.15 L17.70 8.77 L18.31 10.25 L20.92 9.94 L20.92 14.06 L18.31 13.75 L17.70 15.23 L19.76 16.85 L16.85 19.76 L15.23 17.70 L13.75 18.31 L14.06 20.92 L9.94 20.92 L10.25 18.31 L8.77 17.70 L7.15 19.76 L4.24 16.85 L6.30 15.23 L5.69 13.75 L3.08 14.06 L3.08 9.94 L5.69 10.25 L6.30 8.77 L4.24 7.15 L7.15 4.24 L8.77 6.30 Z"/><circle cx="12" cy="12" r="3.05"/></svg></button>
+      <button class="cog" id="cog" type="button" aria-label="Nastavení"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M10.25 5.69 L9.94 3.08 L14.06 3.08 L13.75 5.69 L15.23 6.30 L16.85 4.24 L19.76 7.15 L17.70 8.77 L18.31 10.25 L20.92 9.94 L20.92 14.06 L18.31 13.75 L17.70 15.23 L19.76 16.85 L16.85 19.76 L15.23 17.70 L13.75 18.31 L14.06 20.92 L9.94 20.92 L10.25 18.31 L8.77 17.70 L7.15 19.76 L4.24 16.85 L6.30 15.23 L5.69 13.75 L3.08 14.06 L3.08 9.94 L5.69 10.25 L6.30 8.77 L4.24 7.15 L7.15 4.24 L8.77 6.30 Z"/><circle cx="12" cy="12" r="3.05"/></svg></button>
     </div>
     <div class="subline" id="subline"></div>
   </header>
 
   <div class="setup" id="setup" hidden>
     <div class="blk">
-      <strong>OpenAI key</strong>
-      Needed to sort items into aisles. Stored only in this browser, never sent anywhere but OpenAI.
+      <strong>Klíč OpenAI</strong>
+      Potřebný k řazení položek do regálů. Uložený jen v tomto prohlížeči, nikam jinam než do OpenAI se neposílá.
       <div class="kb">
         <input id="key" name="openai-key" type="password" placeholder="sk-…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
-        <button class="save" id="saveKey" type="button">Save</button>
+        <button class="save" id="saveKey" type="button">Uložit</button>
       </div>
-      <button class="drop" id="dropKey" type="button" hidden>Remove stored key</button>
+      <button class="drop" id="dropKey" type="button" hidden>Odstranit uložený klíč</button>
     </div>
     <div class="blk">
-      <strong>GitHub sync</strong>
-      Optional. Keeps the list in a private Gist, so it survives Safari clearing
-      its storage and shows up on your other devices. Needs a fine-grained token
-      with <em>Gists: read and write</em>.
+      <strong>Synchronizace s GitHubem</strong>
+      Volitelné. Seznam se ukládá do soukromého Gistu, takže přežije vymazání dat
+      v Safari a objeví se i na dalších zařízeních. Potřebuje token s oprávněním
+      <em>Gists: read and write</em>.
       <div class="kb">
         <input id="tok" name="github-token" type="password" placeholder="github_pat_…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
-        <button class="save" id="saveTok" type="button">Save</button>
+        <button class="save" id="saveTok" type="button">Uložit</button>
       </div>
       <div class="ginfo" id="ginfo"></div>
-      <button class="drop" id="dropTok" type="button" hidden>Disconnect sync</button>
+      <button class="drop" id="dropTok" type="button" hidden>Vypnout synchronizaci</button>
     </div>
     <div class="blk">
-      <strong>Colour</strong>
-      Colours the title, buttons and ticks. Travels with the list, so your other
-      devices pick it up too.
+      <strong>Barva</strong>
+      Obarví nadpis, tlačítka a zaškrtávátka. Putuje se seznamem, takže si ji
+      vezmou i další zařízení.
       <div class="swatches" id="swatches"></div>
     </div>
     <div class="blk">
-      <strong>Appearance</strong>
-      Follow the phone, or pin it. Also travels with the list.
+      <strong>Regály</strong>
+      Pořadí odpovídá tomu, jak procházíš obchod. Putuje se seznamem.
+      <div id="seclist"></div>
+      <button class="addsec" id="addsec" type="button">+ Přidat regál</button>
+    </div>
+    <div class="blk">
+      <strong>Prázdné regály</strong>
+      <div class="togglerow">
+        <span>Zobrazit regály, ve kterých nic není</span>
+        <button class="swt" id="emptyToggle" type="button" role="switch" aria-checked="false" aria-label="Zobrazit prázdné regály"></button>
+      </div>
+    </div>
+    <div class="blk">
+      <strong>Vzhled</strong>
+      Podle telefonu, nebo napevno. Také putuje se seznamem.
       <div class="seg" id="modes"></div>
     </div>
     <div class="credit">
-      Developed for Anna ❤️
+      Vyvinuto pro Annu ❤️
       <span class="who">@vittuhy</span>
     </div>
   </div>
 
   <div class="empty" id="empty" hidden>
-    <strong>Nothing on the list</strong>
-    Add something below.
+    <strong>Seznam je prázdný</strong>
+    Něco přidej níž.
   </div>
 
   <div id="aisles"></div>
@@ -247,38 +285,43 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 (function(){
   "use strict";
 
-  var SECTIONS = [
-    { name: "Ovoce & zelenina",     emoji: "🍇" },
-    { name: "Trvanlivé",            emoji: "🍝" },
-    { name: "Maso",                 emoji: "🍗" },
-    { name: "Pečivo",               emoji: "🥖" },
-    { name: "Uzeniny a lahůdky",    emoji: "🥓" },
-    { name: "Mléčné a chlazené",    emoji: "🧀" },
-    { name: "Nápoje",               emoji: "🧃" },
-    { name: "Drogerie a domácnost", emoji: "🧴" },
-    { name: "Ostatní",              emoji: "📦" },
-    { name: "DM drogerie",          svg: "<svg viewBox=\"0 0 24 24\" width=\"21\" height=\"21\" aria-hidden=\"true\"><defs><clipPath id=\"dmc\"><rect width=\"24\" height=\"24\" rx=\"6\"/></clipPath></defs><g clip-path=\"url(#dmc)\"><rect width=\"24\" height=\"24\" fill=\"#1B3F94\"/><path d=\"M-1 15.8c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V18c-6 1.9-9.4 3.4-12.6 4.1-3.6.8-8-3-13.4-.6z\" fill=\"#FFC800\"/><path d=\"M-1 19.4c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V25H-1z\" fill=\"#E2001A\"/><text x=\"12\" y=\"12.6\" text-anchor=\"middle\" fill=\"#fff\" font-family=\"-apple-system,Helvetica,Arial,sans-serif\" font-size=\"11\" font-weight=\"700\" letter-spacing=\"-.5\">dm</text></g></svg>" }
+  var DEFAULT_SECTIONS = [
+    { name: "Ovoce & zelenina",     emoji: "\uD83C\uDF47" },
+    { name: "Trvanlivé",            emoji: "\uD83C\uDF5D" },
+    { name: "Maso",                 emoji: "\uD83C\uDF57" },
+    { name: "Pečivo",               emoji: "\uD83E\uDD56" },
+    { name: "Uzeniny a lahůdky",    emoji: "\uD83E\uDD53" },
+    { name: "Mléčné a chlazené",    emoji: "\uD83E\uDDC0" },
+    { name: "Nápoje",               emoji: "\uD83E\uDDC3" },
+    { name: "Drogerie a domácnost", emoji: "\uD83E\uDDF4" },
+    { name: "Ostatní",              emoji: "\uD83D\uDCE6" },
+    { name: "DM drogerie",          emoji: "\uD83D\uDD35" }
   ];
+  // drawn marks keyed by name, so they survive a round trip through the gist
+  var MARKS = { "dm drogerie": "<svg viewBox=\"0 0 24 24\" width=\"21\" height=\"21\" aria-hidden=\"true\"><defs><clipPath id=\"dmc\"><rect width=\"24\" height=\"24\" rx=\"6\"/></clipPath></defs><g clip-path=\"url(#dmc)\"><rect width=\"24\" height=\"24\" fill=\"#1B3F94\"/><path d=\"M-1 15.8c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V18c-6 1.9-9.4 3.4-12.6 4.1-3.6.8-8-3-13.4-.6z\" fill=\"#FFC800\"/><path d=\"M-1 19.4c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V25H-1z\" fill=\"#E2001A\"/><text x=\"12\" y=\"12.6\" text-anchor=\"middle\" fill=\"#fff\" font-family=\"-apple-system,Helvetica,Arial,sans-serif\" font-size=\"11\" font-weight=\"700\" letter-spacing=\"-.5\">dm</text></g></svg>" };
+  var SECTIONS = DEFAULT_SECTIONS.slice();
+  var BUILTIN = {};
   var FALLBACK = "Ostatní";
+  var K_SECT = "nakup.sections";
 
   var THEMES = [
-    { id: "coral",   label: "Coral",   deep: "#C1452C", pastel: "#FF8A73", ink: "#3B0F07" },
-    { id: "amber",   label: "Amber",   deep: "#9A6608", pastel: "#FFC15E", ink: "#3A2703" },
-    { id: "lime",    label: "Lime",    deep: "#5D7C1E", pastel: "#B4DC6A", ink: "#1E2A06" },
-    { id: "teal",    label: "Teal",    deep: "#14776A", pastel: "#4ECFBB", ink: "#052B26" },
-    { id: "azure",   label: "Azure",   deep: "#1D5FB0", pastel: "#6FB3FF", ink: "#04203F" },
-    { id: "violet",  label: "Violet",  deep: "#5734B8", pastel: "#B396FF", ink: "#14063A" },
-    { id: "fuchsia", label: "Fuchsia", deep: "#B02473", pastel: "#FF85C0", ink: "#3A0621" }
+    { id: "coral",   label: "Korálová",   deep: "#C1452C", pastel: "#FF8A73", ink: "#3B0F07" },
+    { id: "amber",   label: "Jantarová",   deep: "#9A6608", pastel: "#FFC15E", ink: "#3A2703" },
+    { id: "lime",    label: "Limetková",    deep: "#5D7C1E", pastel: "#B4DC6A", ink: "#1E2A06" },
+    { id: "teal",    label: "Tyrkysová",    deep: "#14776A", pastel: "#4ECFBB", ink: "#052B26" },
+    { id: "azure",   label: "Azurová",   deep: "#1D5FB0", pastel: "#6FB3FF", ink: "#04203F" },
+    { id: "violet",  label: "Fialová",  deep: "#5734B8", pastel: "#B396FF", ink: "#14063A" },
+    { id: "fuchsia", label: "Purpurová", deep: "#B02473", pastel: "#FF85C0", ink: "#3A0621" }
   ];
   var MODES = [
     { id: "auto",  label: "Auto" },
-    { id: "light", label: "Light" },
-    { id: "dark",  label: "Dark" }
+    { id: "light", label: "Světlý" },
+    { id: "dark",  label: "Tmavý" }
   ];
   var MODEL = "gpt-4.1-mini";
   var K_ITEMS = "nakup.items", K_SHUT = "nakup.shut", K_DONE = "nakup.showdone", K_KEY = "nakup.key";
   var K_TOK = "nakup.ghtoken", K_GIST = "nakup.gistid", K_STAMP = "nakup.updated";
-  var K_THEME = "nakup.theme", K_MODE = "nakup.mode";
+  var K_THEME = "nakup.theme", K_MODE = "nakup.mode", K_EMPTY = "nakup.showempty";
   var GIST_FILE = "nakup.json";
 
   var items = [], shut = {}, showDone = true, busy = false, settingsOpen = false;
@@ -297,6 +340,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var elGinfo  = document.getElementById("ginfo");
   var elSwatch = document.getElementById("swatches");
   var elModes  = document.getElementById("modes");
+  var elEmptyT = document.getElementById("emptyToggle");
+  var elSecList = document.getElementById("seclist");
   var elKey    = document.getElementById("key");
   var elCog    = document.getElementById("cog");
 
@@ -315,6 +360,117 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     var v = null;
     try { v = localStorage.getItem(K_MODE); } catch(e){}
     return pick(MODES, v, "auto");
+  }
+  function loadSections(){
+    var v = lsGet(K_SECT, null);
+    if(Array.isArray(v) && v.length){
+      SECTIONS = v.filter(function(x){ return x && x.name; })
+                  .map(function(x){ return { name: String(x.name), emoji: String(x.emoji || "") }; });
+    }
+    if(!SECTIONS.length) SECTIONS = DEFAULT_SECTIONS.slice();
+    // a built-in aisle can never go missing, however the stored list was edited
+    var have = {};
+    SECTIONS.forEach(function(x){ have[norm(x.name)] = true; });
+    DEFAULT_SECTIONS.forEach(function(d){
+      if(!have[norm(d.name)]) SECTIONS.push({ name: d.name, emoji: d.emoji });
+    });
+    rebuildIndex();
+  }
+  function saveSections(push){
+    lsSet(K_SECT, SECTIONS);
+    rebuildIndex();
+    renderSections();
+    render();
+    if(push){ setStamp(Date.now()); scheduleSync(); }
+  }
+
+  function renderSections(){
+    if(!elSecList) return;
+    elSecList.textContent = "";
+    SECTIONS.forEach(function(sec, i){
+      var row = document.createElement("div");
+      row.className = "secrow";
+
+      var emo = document.createElement("input");
+      emo.className = "emo-in";
+      emo.value = sec.emoji || "";
+      emo.maxLength = 4;
+      emo.setAttribute("aria-label", "Ikona");
+      emo.addEventListener("change", function(){
+        SECTIONS[i].emoji = emo.value.trim();
+        saveSections(true);
+      });
+
+      var fixed = isBuiltin(sec);
+
+      var nm = document.createElement("input");
+      nm.className = "nm-in";
+      nm.value = sec.name;
+      nm.setAttribute("aria-label", "N\u00e1zev reg\u00e1lu");
+      if(fixed) nm.readOnly = true;
+      nm.addEventListener("change", function(){
+        if(fixed){ nm.value = sec.name; return; }
+        var v = nm.value.trim();
+        if(!v){ nm.value = sec.name; return; }
+        var old = SECTIONS[i].name;
+        SECTIONS[i].name = v;
+        // carry the items across so a rename does not strand them
+        items.forEach(function(it){ if(norm(it.section) === norm(old)) it.section = v; });
+        persist();
+        saveSections(true);
+      });
+
+      var up = document.createElement("button");
+      up.type = "button"; up.textContent = "\u25b2";
+      up.disabled = i === 0;
+      up.setAttribute("aria-label", "Nahoru");
+      up.addEventListener("click", function(){
+        var t = SECTIONS[i]; SECTIONS[i] = SECTIONS[i - 1]; SECTIONS[i - 1] = t;
+        saveSections(true);
+      });
+
+      var dn = document.createElement("button");
+      dn.type = "button"; dn.textContent = "\u25bc";
+      dn.disabled = i === SECTIONS.length - 1;
+      dn.setAttribute("aria-label", "Dol\u016f");
+      dn.addEventListener("click", function(){
+        var t = SECTIONS[i]; SECTIONS[i] = SECTIONS[i + 1]; SECTIONS[i + 1] = t;
+        saveSections(true);
+      });
+
+      var del = document.createElement("button");
+      del.className = "del"; del.type = "button"; del.textContent = "\u00d7";
+      del.disabled = fixed;
+      del.setAttribute("aria-label", "Smazat reg\u00e1l");
+      del.addEventListener("click", function(){
+        if(fixed) return;
+        var gone = SECTIONS[i].name;
+        SECTIONS.splice(i, 1);
+        rebuildIndex();
+        // anything in the removed aisle falls back rather than vanishing
+        items.forEach(function(it){ if(norm(it.section) === norm(gone)) it.section = FALLBACK; });
+        persist();
+        saveSections(true);
+      });
+
+      row.appendChild(emo); row.appendChild(nm);
+      row.appendChild(up); row.appendChild(dn); row.appendChild(del);
+      elSecList.appendChild(row);
+    });
+  }
+
+  function showEmpty(){
+    try { return localStorage.getItem(K_EMPTY) === "1"; } catch(e){ return false; }
+  }
+  function setShowEmpty(on){
+    try { localStorage.setItem(K_EMPTY, on ? "1" : "0"); } catch(e){}
+    renderToggles();
+    render();
+    setStamp(Date.now());
+    scheduleSync();
+  }
+  function renderToggles(){
+    if(elEmptyT) elEmptyT.setAttribute("aria-checked", showEmpty() ? "true" : "false");
   }
   function themeById(id){
     for(var i = 0; i < THEMES.length; i++) if(THEMES[i].id === id) return THEMES[i];
@@ -389,8 +545,22 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     return String(s == null ? "" : s).toLowerCase().replace(/&/g, "a").replace(/\s+/g, " ").trim();
   }
   var BY_NORM = {};
-  SECTIONS.forEach(function(s){ BY_NORM[norm(s.name)] = s.name; });
+  function rebuildIndex(){
+    BUILTIN = {};
+    DEFAULT_SECTIONS.forEach(function(x){ BUILTIN[norm(x.name)] = true; });
+    BY_NORM = {};
+    SECTIONS.forEach(function(x){ BY_NORM[norm(x.name)] = x.name; });
+    FALLBACK = fallbackName();
+  }
+  function isBuiltin(sec){ return !!BUILTIN[norm(sec.name)]; }
+  function fallbackName(){
+    for(var i = 0; i < SECTIONS.length; i++){
+      if(norm(SECTIONS[i].name) === "ostatn\u00ed") return SECTIONS[i].name;
+    }
+    return SECTIONS.length ? SECTIONS[SECTIONS.length - 1].name : "Ostatn\u00ed";
+  }
   function resolveSection(raw){ return BY_NORM[norm(raw)] || FALLBACK; }
+  function markFor(sec){ return MARKS[norm(sec.name)] || null; }
 
   function lsGet(k, d){
     try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch(e){ return d; }
@@ -486,12 +656,14 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     items.forEach(function(it){ buckets[resolveSection(it.section)].push(it); });
 
     var frag = document.createDocumentFragment(), anyVisible = false;
+    // only worth showing empty aisles once the list has something in it
+    var keepEmpty = showEmpty() && items.length > 0;
 
     SECTIONS.forEach(function(sec){
       var all = buckets[sec.name];
       var list = showDone ? all : all.filter(function(x){ return !x.done; });
-      if(!list.length) return;
-      anyVisible = true;
+      if(list.length) anyVisible = true;
+      else if(!keepEmpty) return;
       list.sort(function(a, b){ return (a.addedAt || 0) - (b.addedAt || 0); });
 
       var box = document.createElement("section");
@@ -502,7 +674,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       head.addEventListener("click", function(){ shut[sec.name] = !shut[sec.name]; lsSet(K_SHUT, shut); render(); });
 
       var emo = document.createElement("span"); emo.className = "emo";
-      if(sec.svg) emo.innerHTML = sec.svg; else emo.textContent = sec.emoji;
+      var mark = markFor(sec);
+      if(mark) emo.innerHTML = mark; else emo.textContent = sec.emoji || "\uD83D\uDED2";
       var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = sec.name;
       var ct = document.createElement("span"); ct.className = "ct";
       var left = all.filter(function(x){ return !x.done; }).length;
@@ -600,9 +773,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   async function syncPush(){
     if(!ghToken() || syncing) return;
     syncing = true;
-    setSync("saving\u2026");
+    setSync("ukládám\u2026");
     try {
-      var body = JSON.stringify({ updatedAt: localStamp(), theme: themeId(), mode: modeId(), items: items });
+      var body = JSON.stringify({ updatedAt: localStamp(), theme: themeId(), mode: modeId(),
+        showEmpty: showEmpty(), sections: SECTIONS, items: items });
       var id = gistId(), res;
       if(id){
         res = await ghFetch("https://api.github.com/gists/" + id, {
@@ -618,10 +792,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       if(!res.ok) throw new Error("http " + res.status);
       var data = await res.json();
       if(!id && data.id){ try { localStorage.setItem(K_GIST, data.id); } catch(e){} }
-      setSync("synced");
-      setTimeout(function(){ if(elSync.textContent === "synced") setSync(""); }, 2500);
+      setSync("uloženo");
+      setTimeout(function(){ if(elSync.textContent === "uloženo") setSync(""); }, 2500);
     } catch(e){
-      setSync("sync failed", true);
+      setSync("chyba synchronizace", true);
     }
     syncing = false;
   }
@@ -655,6 +829,17 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
               try { localStorage.setItem(K_MODE, remote.mode); } catch(e){}
               look = true;
             }
+            if(Array.isArray(remote.sections) && remote.sections.length){
+              SECTIONS = remote.sections.filter(function(x){ return x && x.name; })
+                .map(function(x){ return { name: String(x.name), emoji: String(x.emoji || "") }; });
+              lsSet(K_SECT, SECTIONS);
+              rebuildIndex();
+              renderSections();
+            }
+            if(typeof remote.showEmpty === "boolean" && remote.showEmpty !== showEmpty()){
+              try { localStorage.setItem(K_EMPTY, remote.showEmpty ? "1" : "0"); } catch(e){}
+              renderToggles();
+            }
             if(look){ applyTheme(); renderSwatches(); renderModes(); }
             render();
           }
@@ -662,7 +847,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       }
       setSync("");
     } catch(e){
-      setSync("sync failed", true);
+      setSync("chyba synchronizace", true);
     }
     syncing = false;
     return stamp;
@@ -703,7 +888,14 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "You get CURRENT LIST (already on the list) and NEW INPUT (free text, typed or dictated).",
       "Split NEW INPUT into individual shopping items. It may be separated by commas, new",
       "lines, the words \"and\" / \"a\", or spoken in one run. Repair obvious dictation errors.",
-      "Keep the shopper's own language and wording, and keep quantities as written.",
+      "Keep the shopper's own language and keep quantities as written.",
+      "",
+      "SPELLING. Write every item in correct Czech with full diacritics, even when",
+      "the input has none, and fix typos: \"rajcata\" -> \"Raj\u010data\", \"mleko\" ->",
+      "\"Ml\u00e9ko\", \"sampon\" -> \"\u0160ampon\", \"kureci prsa\" -> \"Ku\u0159ec\u00ed prsa\",",
+      "\"zakysana smetana\" -> \"Zakysan\u00e1 smetana\", \"uzene maso\" -> \"Uzen\u00e9 maso\",",
+      "\"toaletni papir\" -> \"Toaletn\u00ed pap\u00edr\". Foreign brands keep their usual spelling",
+      "(\"Coca Cola\", \"Nutella\", \"Jar\").",
       "Merge duplicates occurring inside NEW INPUT itself.",
       "",
       "CAPITALISATION. Every item starts with a capital letter: \"rohliky\" -> \"Rohl\u00edky\",",
@@ -807,7 +999,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
     if(!getKey()){
       elSetup.hidden = false;
-      say("Add your OpenAI key first — items went to " + FALLBACK + ".", "err");
+      say("Nejdřív vlož klíč OpenAI — items went to " + FALLBACK + ".", "err");
     }
 
     setBusy(true);
@@ -817,10 +1009,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     try {
       result = clean(await askOpenAI(raw));
     } catch(e){
-      if(e && e.status === 401) say("Key rejected — items went to " + FALLBACK + ".", "err");
-      else if(e && e.status === 429) say("Rate limited — items went to " + FALLBACK + ".", "err");
-      else if(e && e.status) say("OpenAI error " + e.status + " — items went to " + FALLBACK + ".", "err");
-      else if(getKey()) say("No connection — items went to " + FALLBACK + ".", "err");
+      if(e && e.status === 401) say("Klíč odmítnut — items went to " + FALLBACK + ".", "err");
+      else if(e && e.status === 429) say("Příliš mnoho požadavků — items went to " + FALLBACK + ".", "err");
+      else if(e && e.status) say("Chyba OpenAI " + e.status + " — položky šly do " + FALLBACK + ".", "err");
+      else if(getKey()) say("Bez připojení — items went to " + FALLBACK + ".", "err");
     }
 
     if(!result || (!result.add.length && !result.skip.length)) result = clean(naiveSplit(raw));
@@ -850,18 +1042,18 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     elTok.value = "";
     document.getElementById("dropKey").hidden = !getKey();
     document.getElementById("dropTok").hidden = !ghToken();
-    elKey.placeholder = getKey() ? "stored · paste to replace" : "sk-…";
-    elTok.placeholder = ghToken() ? "stored · paste to replace" : "github_pat_…";
+    elKey.placeholder = getKey() ? "uloženo · vložením nahradíš" : "sk-…";
+    elTok.placeholder = ghToken() ? "uloženo · vložením nahradíš" : "github_pat_…";
     elGinfo.textContent = "";
     if(ghToken() && gistId()){
       var a = document.createElement("a");
       a.href = "https://gist.github.com/" + gistId();
       a.target = "_blank"; a.rel = "noopener";
       a.textContent = "gist " + gistId().slice(0, 8);
-      elGinfo.appendChild(document.createTextNode("Syncing to "));
+      elGinfo.appendChild(document.createTextNode("Synchronizuje se do "));
       elGinfo.appendChild(a);
     } else if(ghToken()){
-      elGinfo.textContent = "A gist will be created on the next change.";
+      elGinfo.textContent = "Gist se vytvoří při další změně.";
     }
   }
 
@@ -877,10 +1069,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   document.getElementById("saveTok").addEventListener("click", async function(){
     var v = elTok.value.trim();
-    if(!v){ say("Nothing to save.", "err"); return; }
+    if(!v){ say("Není co uložit.", "err"); return; }
     try { localStorage.setItem(K_TOK, v); } catch(e){}
     elTok.value = "";
-    say("Token saved — checking…", "work");
+    say("Token uložen — ověřuji…", "work");
     await findGist();
     var remoteStamp = gistId() ? await syncPull() : 0;
     if(!gistId() || localStamp() > remoteStamp || items.length){
@@ -889,38 +1081,52 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     }
     refreshSetup();
     var ok = elSync.className.indexOf("bad") === -1;
-    say(ok ? "Sync is on." : "GitHub rejected that token.", ok ? null : "err");
+    say(ok ? "Synchronizace běží." : "GitHub ten token odmítl.", ok ? null : "err");
   });
 
   document.getElementById("dropTok").addEventListener("click", function(){
     try { localStorage.removeItem(K_TOK); localStorage.removeItem(K_GIST); } catch(e){}
     setSync("");
     showSettings(false);
-    say("Sync off. The gist itself is untouched.");
+    say("Synchronizace vypnuta. Gist zůstává.");
   });
 
   elSync.addEventListener("click", function(){ syncPull().then(syncPush); });
+
+  if(elEmptyT) elEmptyT.addEventListener("click", function(){ setShowEmpty(!showEmpty()); });
+
+  var elAddSec = document.getElementById("addsec");
+  if(elAddSec) elAddSec.addEventListener("click", function(){
+    SECTIONS.push({ name: "Nov\u00fd reg\u00e1l", emoji: "\uD83D\uDED2" });
+    saveSections(true);
+    var rows = elSecList.querySelectorAll(".nm-in");
+    var last = rows[rows.length - 1];
+    if(last){ last.focus(); last.select(); }
+  });
   document.getElementById("saveKey").addEventListener("click", function(){
     var v = elKey.value.trim();
-    if(!v){ say("Nothing to save.", "err"); return; }
+    if(!v){ say("Není co uložit.", "err"); return; }
     try { localStorage.setItem(K_KEY, v); } catch(e){}
     elKey.value = "";
     showSettings(false);
-    say("Key saved.");
+    say("Klíč uložen.");
   });
   document.getElementById("dropKey").addEventListener("click", function(){
     try { localStorage.removeItem(K_KEY); } catch(e){}
     showSettings(false);
-    say("Key removed.");
+    say("Klíč odstraněn.");
   });
 
   // ---- boot ----
   items = lsGet(K_ITEMS, []); if(!Array.isArray(items)) items = [];
   shut = lsGet(K_SHUT, {}) || {};
   showDone = !!lsGet(K_DONE, true);
+  loadSections();
+  renderSections();
   applyTheme();
   renderSwatches();
   renderModes();
+  renderToggles();
   if(darkMQ && darkMQ.addEventListener){
     darkMQ.addEventListener("change", function(){
       if(modeId() === "auto"){ applyTheme(); renderSwatches(); renderModes(); }
