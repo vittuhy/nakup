@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:05</span>
+      <span class="build">build 22.09. 12:07</span>
     </div>
   </div>
 
@@ -1088,9 +1088,26 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "capitalised: \"coca cola\" -> \"Coca Cola\", \"red bull\" -> \"Red Bull\", \"jar\" -> \"Jar\".",
       "Units and quantities stay lowercase: \"Ml\u00e9ko 1,5 l\", \"Rohl\u00edky 6 ks\".",
       "",
-      "An item already on CURRENT LIST goes in \"skip\", not \"add\". Match on meaning, not",
-      "characters: \"mliko\" = \"mleko\", \"tomatoes\" = \"rajcata\", singular = plural. Ignore",
-      "quantity when matching, unless the new item is a clearly different variant.",
+      "An item already on CURRENT LIST goes in \"skip\", not \"add\".",
+      "",
+      "Match on meaning, not spelling: \"mliko\" = \"mleko\", \"tomatoes\" = \"rajcata\",",
+      "singular = plural, a typo = the word it was meant to be.",
+      "",
+      "Ignore PURE QUANTITY when matching - numbers, units and counts only:",
+      "\"mleko\" = \"2 l mleko\" = \"3x mleko\" = \"hodne mleka\".",
+      "",
+      "But any word that changes WHICH PRODUCT is taken off the shelf makes it a",
+      "DIFFERENT item, never a duplicate. Size, variety, colour, flavour, fat",
+      "content, packaging, brand and preparation all count:",
+      "- \"mrkev\" and \"male mrkve\" are two items",
+      "- \"rajcata\" and \"cherry rajcata\" are two items",
+      "- \"mleko\" and \"bezlaktozove mleko\" are two items",
+      "- \"jogurt\" and \"bily jogurt\" are two items",
+      "- \"chleba\" and \"toustovy chleba\" are two items",
+      "- \"jablka\" and \"zelena jablka\" are two items",
+      "",
+      "When unsure whether two things are the same product, ADD it rather than skip",
+      "it. A duplicate on the list costs nothing; a missing item means going back.",
       "",
       "Assign every added item to exactly one SECTION:"
     ].concat(hintLines()).concat([
