@@ -66,7 +66,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .aisle{margin-top:14px}
 .aisle:first-child{margin-top:4px}
 .ahead{display:flex; align-items:center; gap:9px; width:100%; background:none; border:0; padding:6px 0 8px; cursor:pointer; color:inherit; font:inherit; text-align:left}
-.ahead .emo{font-size:1.28rem; line-height:1; flex:0 0 auto}
+.ahead .emo{font-size:1.28rem; line-height:1; flex:0 0 auto; display:flex; align-items:center}
+.ahead .emo svg{display:block}
 .ahead .nm{font-size:1.26rem; font-weight:700; letter-spacing:-.02em; flex:1; min-width:0}
 .ahead .ct{font-size:.95rem; color:var(--ink-2); font-variant-numeric:tabular-nums}
 .chev{flex:0 0 auto; width:13px; height:13px; border-right:2.2px solid var(--ink-2); border-bottom:2.2px solid var(--ink-2); transform:rotate(45deg) translate(-2px,-2px); transition:transform .18s ease; border-radius:1px}
@@ -135,7 +136,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       <strong>OpenAI key</strong>
       Needed to sort items into aisles. Stored only in this browser, never sent anywhere but OpenAI.
       <div class="kb">
-        <input id="key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <input id="key" name="openai-key" type="password" placeholder="sk-…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
         <button class="save" id="saveKey" type="button">Save</button>
       </div>
       <button class="drop" id="dropKey" type="button" hidden>Remove stored key</button>
@@ -146,7 +147,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       its storage and shows up on your other devices. Needs a fine-grained token
       with <em>Gists: read and write</em>.
       <div class="kb">
-        <input id="tok" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <input id="tok" name="github-token" type="password" placeholder="github_pat_…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
         <button class="save" id="saveTok" type="button">Save</button>
       </div>
       <div class="ginfo" id="ginfo"></div>
@@ -185,7 +186,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     { name: "Nápoje",               emoji: "🧃" },
     { name: "Drogerie a domácnost", emoji: "🧴" },
     { name: "Ostatní",              emoji: "📦" },
-    { name: "DM drogerie",          emoji: "🔵" }
+    { name: "DM drogerie",          svg: "<svg viewBox=\"0 0 24 24\" width=\"21\" height=\"21\" aria-hidden=\"true\"><defs><clipPath id=\"dmc\"><rect width=\"24\" height=\"24\" rx=\"6\"/></clipPath></defs><g clip-path=\"url(#dmc)\"><rect width=\"24\" height=\"24\" fill=\"#1B3F94\"/><path d=\"M-1 15.8c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V18c-6 1.9-9.4 3.4-12.6 4.1-3.6.8-8-3-13.4-.6z\" fill=\"#FFC800\"/><path d=\"M-1 19.4c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V25H-1z\" fill=\"#E2001A\"/><text x=\"12\" y=\"12.6\" text-anchor=\"middle\" fill=\"#fff\" font-family=\"-apple-system,Helvetica,Arial,sans-serif\" font-size=\"11\" font-weight=\"700\" letter-spacing=\"-.5\">dm</text></g></svg>" }
   ];
   var FALLBACK = "Ostatní";
   var MODEL = "gpt-4.1-mini";
@@ -283,7 +284,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       head.className = "ahead"; head.type = "button";
       head.addEventListener("click", function(){ shut[sec.name] = !shut[sec.name]; lsSet(K_SHUT, shut); render(); });
 
-      var emo = document.createElement("span"); emo.className = "emo"; emo.textContent = sec.emoji;
+      var emo = document.createElement("span"); emo.className = "emo";
+      if(sec.svg) emo.innerHTML = sec.svg; else emo.textContent = sec.emoji;
       var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = sec.name;
       var ct = document.createElement("span"); ct.className = "ct";
       var left = all.filter(function(x){ return !x.done; }).length;
