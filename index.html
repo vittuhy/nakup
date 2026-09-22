@@ -362,7 +362,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:41</span>
+      <span class="build">build 22.09. 13:42</span>
     </div>
   </div>
 
@@ -897,11 +897,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       add.dataset.section = sec.name;
       var dot = document.createElement("span");
       dot.className = "dot";
-      // the plus has to span nearly its whole box, or its strokes start well to
-      // the right of the tick circle's edge and the row looks indented
-      dot.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
-        + 'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" '
-        + 'aria-hidden="true"><path d="M12 2.5v19M2.5 12h19"/></svg>';
+      dot.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+        + 'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" '
+        + 'aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
       var lbl = document.createElement("span"); lbl.textContent = "P\u0159idat polo\u017eku";
       add.appendChild(dot); add.appendChild(lbl);
       add.addEventListener("click", function(){ addInSection(sec.name, add); });
