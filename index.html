@@ -566,6 +566,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "Keep the shopper's own language and wording, and keep quantities as written.",
       "Merge duplicates occurring inside NEW INPUT itself.",
       "",
+      "CAPITALISATION. Every item starts with a capital letter: \"rohliky\" -> \"Rohl\u00edky\",",
+      "\"zakysana smetana\" -> \"Zakysan\u00e1 smetana\". A brand name has every word of the brand",
+      "capitalised: \"coca cola\" -> \"Coca Cola\", \"red bull\" -> \"Red Bull\", \"jar\" -> \"Jar\".",
+      "Units and quantities stay lowercase: \"Ml\u00e9ko 1,5 l\", \"Rohl\u00edky 6 ks\".",
+      "",
       "An item already on CURRENT LIST goes in \"skip\", not \"add\". Match on meaning, not",
       "characters: \"mliko\" = \"mleko\", \"tomatoes\" = \"rajcata\", singular = plural. Ignore",
       "quantity when matching, unless the new item is a clearly different variant.",
@@ -626,11 +631,17 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     return JSON.parse(txt);
   }
 
+  function capFirst(s){
+    s = String(s == null ? "" : s).trim();
+    if(!s) return s;
+    return s.charAt(0).toLocaleUpperCase("cs") + s.slice(1);
+  }
+
   function clean(r){
     var add = [], skip = [];
     if(r && Array.isArray(r.add)) r.add.forEach(function(x){
       if(!x) return;
-      var n = String(x.name == null ? "" : x.name).trim();
+      var n = capFirst(x.name);
       if(n) add.push({ name: n, section: resolveSection(x.section) });
     });
     if(r && Array.isArray(r.skip)) r.skip.forEach(function(x){
