@@ -243,17 +243,17 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       <div class="swatches" id="swatches"></div>
     </div>
     <div class="blk">
-      <strong>Regály</strong>
+      <strong>Sekce</strong>
       Pořadí odpovídá tomu, jak procházíš obchod. Putuje se seznamem.
       <div id="seclist"></div>
-      <button class="addsec" id="addsec" type="button">+ Přidat regál</button>
-      <button class="drop" id="resetsec" type="button">Obnovit výchozí regály</button>
+      <button class="addsec" id="addsec" type="button">+ Přidat sekci</button>
+      <button class="drop" id="resetsec" type="button">Obnovit výchozí sekce</button>
     </div>
     <div class="blk">
-      <strong>Prázdné regály</strong>
+      <strong>Prázdné sekce</strong>
       <div class="togglerow">
-        <span>Zobrazit regály, ve kterých nic není</span>
-        <button class="swt" id="emptyToggle" type="button" role="switch" aria-checked="false" aria-label="Zobrazit prázdné regály"></button>
+        <span>Zobrazit sekce, ve kterých nic není</span>
+        <button class="swt" id="emptyToggle" type="button" role="switch" aria-checked="false" aria-label="Zobrazit prázdné sekce"></button>
       </div>
     </div>
     <div class="blk">
@@ -417,7 +417,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       var nm = document.createElement("input");
       nm.className = "nm-in";
       nm.value = sec.name;
-      nm.setAttribute("aria-label", "N\u00e1zev reg\u00e1lu");
+      nm.setAttribute("aria-label", "N\u00e1zev sekce");
       nm.addEventListener("change", function(){
         var v = nm.value.trim();
         if(!v || nameTaken(v, i)){ nm.value = SECTIONS[i].name; return; }
@@ -441,7 +441,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       var del = document.createElement("button");
       del.className = "del"; del.type = "button"; del.textContent = "\u00d7";
       del.disabled = SECTIONS.length < 2;
-      del.setAttribute("aria-label", "Smazat reg\u00e1l");
+      del.setAttribute("aria-label", "Smazat sekci");
       del.addEventListener("click", function(){
         if(SECTIONS.length < 2) return;
         var gone = SECTIONS[i].name;
@@ -1192,12 +1192,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     items.forEach(function(it){ it.section = resolveSection(it.section); });
     persist();
     saveSections(true);
-    say("V\u00fdchoz\u00ed regály obnoveny.");
+    say("V\u00fdchoz\u00ed sekce obnoveny.");
   });
 
   var elAddSec = document.getElementById("addsec");
   if(elAddSec) elAddSec.addEventListener("click", function(){
-    var base = "Nov\u00fd reg\u00e1l", name = base, n = 2;
+    var base = "Nov\u00e1 sekce", name = base, n = 2;
     while(nameTaken(name, -1)) name = base + " " + (n++);
     SECTIONS.push({ name: name, emoji: "\uD83D\uDED2" });
     saveSections(true);

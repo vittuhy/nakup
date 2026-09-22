@@ -1,6 +1,6 @@
 # Nákup
 
-A grocery list that sorts what you dictate into your store's aisles, in your own fixed order.
+A grocery list that sorts what you dictate into your store's sections, in your own fixed order.
 
 Static single page — no backend, no build step. The list lives in the browser's
 `localStorage` on the device you use it from.
@@ -26,7 +26,7 @@ A Shortcut, four actions:
 Then **Settings → Action Button → Shortcut**. The page reads `?add=` on load and
 sorts straight away.
 
-## Changing the aisles
+## Changing the sections
 
 `SECTIONS` at the top of the script in `index.html` — names and emoji, in
 store-walking order. Section matching ignores case, spacing and `&` vs `a`, so
@@ -52,7 +52,7 @@ Seven pastels and an appearance switch (Auto / Light / Dark) under ⚙. Both rid
 along in the gist, so other devices adopt them on their next pull. Auto follows
 the phone; Light and Dark pin it regardless.
 
-## Aisles
+## Sections
 
 The array in `index.html` seeds a first run only. Everything is editable after
 that — rename, add, delete, drag to reorder — and the gist holds the whole list.
@@ -60,10 +60,10 @@ A button restores the defaults.
 
 Sections carry their own timestamp, separate from the items'. A fresh install
 starts at 0 and therefore always yields to the gist, so adding one item on a new
-device can never push its stock aisle list over a customised one.
+device can never push its stock section list over a customised one.
 
-Renaming an aisle carries its items across; deleting one moves them to the
-fallback. Duplicate and empty names are refused, and the last aisle cannot be
-deleted. The fallback is the aisle named *Ostatní*, or the last one if it is
-gone. Category hints given to the model are filtered to aisles that still exist.
+Renaming an section carries its items across; deleting one moves them to the
+fallback. Duplicate and empty names are refused, and the last section cannot be
+deleted. The fallback is the section named *Ostatní*, or the last one if it is
+gone. Category hints given to the model are filtered to sections that still exist.
 Drawn marks (the dm swatch) are keyed by name.
