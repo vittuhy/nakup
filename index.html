@@ -104,6 +104,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .tick{flex:0 0 auto; width:24px; height:24px; border-radius:50%; padding:0; border:1.6px solid var(--ring); background:transparent; cursor:pointer; display:grid; place-items:center; position:relative}
 /* the circle is the only way to tick off now, so widen its touch target */
 .tick::before{content:""; position:absolute; inset:-11px; border-radius:50%}
+.row input.edit.fresh{margin:0}
+.tick.ghost{cursor:default}
+.tick.ghost::before{content:none}
 .tick::after{content:""; width:6px; height:11px; border:solid transparent; border-width:0 2.2px 2.2px 0; transform:rotate(42deg) translate(-1px,-1px)}
 .row.done .tick{background:var(--accent-solid); border-color:var(--accent-solid)}
 .row.done .tick::after{border-color:var(--on-accent)}
@@ -359,7 +362,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:38</span>
+      <span class="build">build 22.09. 13:41</span>
     </div>
   </div>
 
@@ -894,9 +897,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       add.dataset.section = sec.name;
       var dot = document.createElement("span");
       dot.className = "dot";
-      dot.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
-        + 'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" '
-        + 'aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+      // the plus has to span nearly its whole box, or its strokes start well to
+      // the right of the tick circle's edge and the row looks indented
+      dot.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
+        + 'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" '
+        + 'aria-hidden="true"><path d="M12 2.5v19M2.5 12h19"/></svg>';
       var lbl = document.createElement("span"); lbl.textContent = "P\u0159idat polo\u017eku";
       add.appendChild(dot); add.appendChild(lbl);
       add.addEventListener("click", function(){ addInSection(sec.name, add); });
@@ -1124,12 +1129,20 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   function addInSection(secName, rowEl){
     if(document.querySelector(".rows input.edit")) return;
     var input = document.createElement("input");
-    input.className = "edit";
+    input.className = "edit fresh";
     input.type = "text";
     input.setAttribute("aria-label", "Nov\u00e1 polo\u017eka");
     input.setAttribute("autocapitalize", "sentences");
     input.setAttribute("spellcheck", "false");
-    rowEl.replaceWith(input);
+    // build a real row first — circle, then the field where the name goes — so
+    // it takes a normal row's height instead of floating over its neighbours
+    var row = document.createElement("div");
+    row.className = "row";
+    var ghost = document.createElement("span");
+    ghost.className = "tick ghost";
+    row.appendChild(ghost);
+    row.appendChild(input);
+    rowEl.replaceWith(row);
     input.focus();
 
     var settled = false;
