@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:04</span>
+      <span class="build">build 22.09. 12:05</span>
     </div>
   </div>
 
@@ -742,20 +742,22 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   // a short height that must NOT be locked in. Only while the keyboard is
   // genuinely up do we size to the visual viewport instead, so the bar sits just
   // above it; otherwise we clear the inline styles and let CSS own the layout.
+  // The shell always tracks the VISUAL viewport - the area actually on screen,
+  // with or without the keyboard. iOS reports this wrongly for the first frames
+  // of an installed app (sometimes short, leaving a gap under the bar; sometimes
+  // tall, pushing the bar off the bottom), so never trust one reading: re-apply
+  // on every relevant event and keep re-measuring while the launch settles.
   function sizeDock(){
     var vv = window.visualViewport;
     var b = document.body.style;
-    if(!vv){ return; }
-    var shrink = window.innerHeight - vv.height;
-    if(shrink > 120){
-      b.bottom = "auto";
-      b.top = Math.max(0, vv.offsetTop) + "px";
-      b.height = vv.height + "px";
-    } else {
-      b.top = "";
-      b.height = "";
-      b.bottom = "";
-    }
+    if(!vv){ b.top = ""; b.height = ""; b.bottom = ""; return; }
+    b.bottom = "auto";
+    b.top = Math.max(0, vv.offsetTop) + "px";
+    b.height = vv.height + "px";
+  }
+
+  function settleViewport(){
+    [0, 50, 150, 350, 700, 1200].forEach(function(t){ setTimeout(sizeDock, t); });
   }
 
   function sizeInput(){
@@ -1326,10 +1328,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   }
   setBusy(false);
   render();
-  sizeDock();
+  settleViewport();
   if(window.ResizeObserver){ try { new ResizeObserver(sizeDock).observe(elDock); } catch(e){} }
   window.addEventListener("resize", sizeDock);
-  window.addEventListener("orientationchange", function(){ setTimeout(sizeDock, 120); });
+  window.addEventListener("load", settleViewport);
+  window.addEventListener("pageshow", settleViewport);          // resumed from the background
+  window.addEventListener("orientationchange", settleViewport);
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden) settleViewport();
+  });
   if(window.visualViewport){
     window.visualViewport.addEventListener("resize", sizeDock);
     window.visualViewport.addEventListener("scroll", sizeDock);
