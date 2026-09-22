@@ -155,7 +155,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 }
 .credit .build{display:block; margin-top:6px; font-size:.72rem; opacity:.55}
 .credit .who{display:block; color:var(--ink-2); font-weight:500; letter-spacing:.01em}
-.swatches{display:flex; flex-wrap:wrap; gap:11px; margin-top:12px}
+/* one row whatever the width: the circles share the space instead of wrapping */
+.swatches{display:flex; flex-wrap:nowrap; gap:3.2%; margin-top:12px}
 .secrow{display:flex; align-items:center; gap:7px; padding:7px 0; border-bottom:.5px solid var(--rule)}
 .secrow:last-of-type{border-bottom:0}
 .secrow input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:8px; padding:7px 9px; outline:none; min-width:0}
@@ -195,7 +196,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .seg{display:flex; margin-top:12px; background:var(--bg); border:.5px solid var(--rule); border-radius:11px; padding:3px; gap:3px}
 .seg button{flex:1 1 0; border:0; background:none; color:var(--ink-2); font:inherit; font-size:15px; font-weight:500; padding:9px 4px; border-radius:8px; cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent-solid); color:var(--on-accent); font-weight:600}
-.sw{width:34px; height:34px; border-radius:50%; border:0; padding:0; cursor:pointer; flex:0 0 auto}
+.sw{
+  flex:1 1 0; min-width:0; max-width:38px; aspect-ratio:1; height:auto;
+  border-radius:50%; border:0; padding:0; cursor:pointer;
+}
 .sw[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--bg-2), 0 0 0 4.5px var(--ink-2)}
 .setup .ginfo a{color:var(--accent)}
 .sync{font-size:.72rem; color:var(--ink-3); cursor:pointer; padding:8px 2px; white-space:nowrap}
@@ -334,7 +338,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:20</span>
+      <span class="build">build 22.09. 13:22</span>
     </div>
   </div>
 
