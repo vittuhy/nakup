@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:07</span>
+      <span class="build">build 22.09. 12:09</span>
     </div>
   </div>
 
@@ -1014,9 +1014,27 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   function remove(it){ items = items.filter(function(x){ return x.id !== it.id; }); persist(); render(); }
   function clearDone(){ items = items.filter(function(x){ return !x.done; }); persist(); render(); }
 
+  // "Mléko - 3ks" and "Mléko" are the same product, so adding a count replaces
+  // the entry rather than sitting beside it. "Malé mrkve" has its own base name,
+  // so a qualified item is never folded into the plain one.
+  function baseOf(name){
+    var t = String(name == null ? "" : name);
+    var i = t.indexOf(" - ");
+    return norm(i === -1 ? t : t.slice(0, i));
+  }
+
   function store(entries){
     entries.forEach(function(e, i){
-      items.push({ id: newId(), name: e.name, section: e.section, done: false, addedAt: Date.now() + i });
+      var b = baseOf(e.name), hit = null;
+      for(var k = 0; k < items.length; k++){
+        if(!items[k].done && baseOf(items[k].name) === b){ hit = items[k]; break; }
+      }
+      if(hit){
+        hit.name = e.name;
+        hit.section = e.section;
+      } else {
+        items.push({ id: newId(), name: e.name, section: e.section, done: false, addedAt: Date.now() + i });
+      }
     });
     persist(); render();
   }
@@ -1073,7 +1091,18 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "You get CURRENT LIST (already on the list) and NEW INPUT (free text, typed or dictated).",
       "Split NEW INPUT into individual shopping items. It may be separated by commas, new",
       "lines, the words \"and\" / \"a\", or spoken in one run. Repair obvious dictation errors.",
-      "Keep the shopper's own language and keep quantities as written.",
+      "Keep the shopper's own language.",
+      "",
+      "QUANTITY. Counts matter in the shop, so never drop them. Put the quantity",
+      "after the name, separated by a space, hyphen, space. Pieces use \"ks\" with no",
+      "space before it; measures keep their unit the same way:",
+      "- \"3 mleka\"        -> \"Ml\u00e9ko - 3ks\"",
+      "- \"dve rohliky\"    -> \"Rohl\u00edk - 2ks\"",
+      "- \"petkrat jogurt\" -> \"Jogurt - 5ks\"",
+      "- \"2 l mleko\"      -> \"Ml\u00e9ko - 2l\"",
+      "- \"pul kila jablek\"-> \"Jablka - 500g\"",
+      "- \"mleko\"          -> \"Ml\u00e9ko\"   (no quantity given, so none is invented)",
+      "The name itself stays singular where Czech allows it: \"Ml\u00e9ko\", not \"Ml\u00e9ka\".",
       "",
       "SPELLING. Write every item in correct Czech with full diacritics, even when",
       "the input has none, and fix typos: \"rajcata\" -> \"Raj\u010data\", \"mleko\" ->",
@@ -1109,12 +1138,18 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "When unsure whether two things are the same product, ADD it rather than skip",
       "it. A duplicate on the list costs nothing; a missing item means going back.",
       "",
+      "If the product IS already on CURRENT LIST and NEW INPUT gives no quantity,",
+      "skip it. If NEW INPUT does give a quantity, return it in \"add\" with the full",
+      "\"Name - Nks\" instead: the list replaces the existing entry rather than",
+      "duplicating it. So \"3 mleka\" with \"Ml\u00e9ko\" already there returns",
+      "\"Ml\u00e9ko - 3ks\".",
+      "",
       "Assign every added item to exactly one SECTION:"
     ].concat(hintLines()).concat([
       "\"" + FALLBACK + "\" is a last resort - re-read the sections before using it.",
       "",
       "Reply with JSON only, this shape:",
-      "{\"add\":[{\"section\":\"" + SECTIONS[0].name + "\",\"name\":\"Rohlíky 6 ks\"}],\"skip\":[\"Mléko\"]}"
+      "{\"add\":[{\"section\":\"" + SECTIONS[0].name + "\",\"name\":\"Rohlík - 6ks\"}],\"skip\":[\"Mléko\"]}"
     ]).join("\n");
   }
 
