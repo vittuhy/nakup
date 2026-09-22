@@ -113,16 +113,22 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   cursor:text; color:var(--ink-3); font-size:.92rem;
 }
 .addrow .dot{
-  flex:0 0 auto; width:18px; height:18px; border-radius:50%;
-  border:1.3px dashed var(--ring); opacity:.75;
+  flex:0 0 auto; width:24px; display:flex; align-items:center; justify-content:center;
+  color:var(--ink-3);
 }
+.addrow .dot svg{display:block}
 .rows input.edit, .row input.edit{
   flex:1 1 auto; min-width:0; font:inherit; color:var(--ink);
   background:var(--bg-2); border:.5px solid var(--accent-solid);
   border-radius:9px; padding:5px 10px; margin:-6px 0; outline:none;
 }
 .row.done .name{color:var(--ink-2); text-decoration:line-through; text-decoration-thickness:1px}
-.kill{flex:0 0 auto; background:none; border:0; color:var(--ink-3); cursor:pointer; font-size:1.35rem; line-height:1; padding:4px 2px 6px; opacity:.6}
+.kill{
+  flex:0 0 auto; background:none; border:0; color:var(--ink-3); cursor:pointer;
+  width:30px; height:30px; padding:0; display:grid; place-items:center;
+  line-height:0; opacity:.6;
+}
+.kill svg{display:block}
 
 .empty{text-align:center; padding:60px 20px 40px; color:var(--ink-2); font-size:.95rem}
 .empty[hidden]{display:none!important}
@@ -353,7 +359,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:37</span>
+      <span class="build">build 22.09. 13:38</span>
     </div>
   </div>
 
@@ -874,7 +880,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         name.className = "name"; name.textContent = it.name;
         name.addEventListener("click", function(){ editItem(it, name); });
         var kill = document.createElement("button");
-        kill.className = "kill"; kill.type = "button"; kill.textContent = "×";
+        kill.className = "kill"; kill.type = "button";
+        kill.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" '
+          + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+          + 'aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
         kill.setAttribute("aria-label", "Smazat " + it.name);
         kill.addEventListener("click", function(){ remove(it); });
         row.appendChild(tick); row.appendChild(name); row.appendChild(kill);
@@ -883,7 +892,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       var add = document.createElement("div");
       add.className = "addrow";
       add.dataset.section = sec.name;
-      var dot = document.createElement("span"); dot.className = "dot";
+      var dot = document.createElement("span");
+      dot.className = "dot";
+      dot.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+        + 'stroke="currentColor" stroke-width="2.1" stroke-linecap="round" '
+        + 'aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
       var lbl = document.createElement("span"); lbl.textContent = "P\u0159idat polo\u017eku";
       add.appendChild(dot); add.appendChild(lbl);
       add.addEventListener("click", function(){ addInSection(sec.name, add); });
