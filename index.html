@@ -121,20 +121,30 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .dock-in{max-width:620px; margin:0 auto; display:flex; align-items:flex-end; gap:10px}
 @property --ang{syntax:'<angle>'; initial-value:0deg; inherits:false}
 .field{position:relative; flex:1 1 auto; min-width:0; display:flex}
-.field::before{
-  content:""; position:absolute; inset:-2.5px; border-radius:21.5px;
+.field::before,
+.field::after{
+  content:""; position:absolute; border-radius:24px;
   z-index:0; pointer-events:none; opacity:0;
+  transition:opacity .28s ease;
+}
+/* wide halo */
+.field::before{
+  inset:-7px;
   background:conic-gradient(from var(--ang),
-    #F3B4A8, #EBCB92, #C2CD9B, #A2D4BD, #A6C6E8, #BBBCEE, #E0B3D6, #F3B4A8);
-  filter:blur(4.5px);
-  transition:opacity .3s ease;
+    #FF2D55, #FF6B00, #FFD60A, #30D158, #00D2C6, #0A84FF, #5E5CE6, #BF5AF2, #FF2D55);
+  filter:blur(13px) saturate(2.2);
 }
-.field.busy::before{
-  opacity:1;
-  animation:spinang 2.4s linear infinite, pulseglow 1.7s ease-in-out infinite;
+/* tight bright rim */
+.field::after{
+  inset:-2px;
+  background:conic-gradient(from calc(var(--ang) * -1.7),
+    #FF375F, #BF5AF2, #0A84FF, #00D2C6, #FFD60A, #FF375F);
+  filter:blur(2.5px) saturate(2.4);
 }
+.field.busy::before{opacity:1; animation:spinang 2.6s linear infinite, halo 1.9s ease-in-out infinite}
+.field.busy::after {opacity:.95; animation:spinang 1.7s linear infinite}
 @keyframes spinang{to{--ang:360deg}}
-@keyframes pulseglow{0%,100%{filter:blur(4.5px)}50%{filter:blur(8px)}}
+@keyframes halo{0%,100%{filter:blur(13px) saturate(2.2)}50%{filter:blur(19px) saturate(2.8)}}
 .field textarea{position:relative; z-index:1}
 .field.busy textarea{border-color:transparent}
 .field .flash{z-index:2}
@@ -258,13 +268,13 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var FALLBACK = "Ostatní";
 
   var THEMES = [
-    { id: "coral",  label: "Coral",  deep: "#BC5D4A", pastel: "#F3B4A8", ink: "#3A150F" },
-    { id: "honey",  label: "Honey",  deep: "#8A6620", pastel: "#EBCB92", ink: "#2E2207" },
-    { id: "olive",  label: "Olive",  deep: "#67743C", pastel: "#C2CD9B", ink: "#1E2410" },
-    { id: "jade",   label: "Jade",   deep: "#3B7E61", pastel: "#A2D4BD", ink: "#0D2A1E" },
-    { id: "sky",    label: "Sky",    deep: "#396A9B", pastel: "#A6C6E8", ink: "#0D2033" },
-    { id: "iris",   label: "Iris",   deep: "#5859A6", pastel: "#BBBCEE", ink: "#17153A" },
-    { id: "orchid", label: "Orchid", deep: "#914A86", pastel: "#E0B3D6", ink: "#2E1029" }
+    { id: "coral",   label: "Coral",   deep: "#C1452C", pastel: "#FF8A73", ink: "#3B0F07" },
+    { id: "amber",   label: "Amber",   deep: "#9A6608", pastel: "#FFC15E", ink: "#3A2703" },
+    { id: "lime",    label: "Lime",    deep: "#5D7C1E", pastel: "#B4DC6A", ink: "#1E2A06" },
+    { id: "teal",    label: "Teal",    deep: "#14776A", pastel: "#4ECFBB", ink: "#052B26" },
+    { id: "azure",   label: "Azure",   deep: "#1D5FB0", pastel: "#6FB3FF", ink: "#04203F" },
+    { id: "violet",  label: "Violet",  deep: "#5734B8", pastel: "#B396FF", ink: "#14063A" },
+    { id: "fuchsia", label: "Fuchsia", deep: "#B02473", pastel: "#FF85C0", ink: "#3A0621" }
   ];
   var MODES = [
     { id: "auto",  label: "Auto" },
