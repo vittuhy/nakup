@@ -72,7 +72,12 @@ header.top{padding:22px 0 10px}
 /* the title's ink sits ~3px below its line box, so box-centred controls read high */
 .titlerow .cog, .titlerow .sync{transform:translateY(3px)}
 h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
-.cog{background:none; border:0; padding:8px; margin-right:-8px; color:var(--ink-2); cursor:pointer; line-height:0; flex:0 0 auto; display:flex; align-items:center}
+.cog{
+  background:none; border:0; padding:0; margin:0; color:var(--ink-2); cursor:pointer;
+  line-height:0; flex:0 0 auto; width:28px; height:28px;
+  display:grid; place-items:center; position:relative;
+}
+.cog::before{content:""; position:absolute; inset:-9px}
 .cog svg{display:block}
 .subline{margin-top:3px; font-size:.86rem; color:var(--ink-2); display:flex; gap:7px; align-items:baseline; min-height:20px; flex-wrap:wrap}
 .subline button{background:none; border:0; padding:0; font:inherit; color:var(--accent); cursor:pointer}
@@ -371,7 +376,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 14:01</span>
+      <span class="build">build 22.09. 14:03</span>
     </div>
   </div>
 
