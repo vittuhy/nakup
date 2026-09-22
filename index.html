@@ -327,7 +327,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 12:09</span>
+      <span class="build">build 22.09. 12:11</span>
     </div>
   </div>
 
@@ -1125,10 +1125,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       "Ignore PURE QUANTITY when matching - numbers, units and counts only:",
       "\"mleko\" = \"2 l mleko\" = \"3x mleko\" = \"hodne mleka\".",
       "",
-      "But any word that changes WHICH PRODUCT is taken off the shelf makes it a",
-      "DIFFERENT item, never a duplicate. Size, variety, colour, flavour, fat",
-      "content, packaging, brand and preparation all count:",
-      "- \"mrkev\" and \"male mrkve\" are two items",
+      "Then apply this test, and nothing looser: strip the quantity from both names",
+      "and compare the REMAINING WORDS. They match ONLY if the words are the same.",
+      "One extra or different word means they DO NOT match, however small it looks.",
+      "\"mal\u00e9\", \"cherry\", \"b\u00edl\u00fd\", \"bezlaktozov\u00e9\", \"toustov\u00fd\", \"zelen\u00e1\" are all such words.",
+      "- \"mrkev\" and \"male mrkve\" are TWO items: \"male\" is an extra word, so they",
+      "  do not match. Never skip one because of the other.",
       "- \"rajcata\" and \"cherry rajcata\" are two items",
       "- \"mleko\" and \"bezlaktozove mleko\" are two items",
       "- \"jogurt\" and \"bily jogurt\" are two items",
@@ -1185,6 +1187,24 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     return JSON.parse(txt);
   }
 
+  // The model is asked for "Name - 3ks" but does not always oblige, so the shape
+  // is enforced here: a trailing quantity is rewritten whatever separator,
+  // spacing or brackets it arrived with.
+  var QTY_UNITS = "ks|kus|kusy|kus\\u016f|l|ml|dcl|kg|g|dkg";
+  function normQty(name){
+    var t = String(name == null ? "" : name).trim();
+    var lead = t.match(new RegExp("^(\\d+)\\s*(?:x|\\u00d7)\\s*(.+)$", "i"));
+    if(lead) t = lead[2].trim() + " - " + lead[1] + "ks";
+    var tail = t.match(new RegExp(
+      "^(.*?)[\\s\\-\\u2013\\u2014]*[\\(\\[]?\\s*(\\d+(?:[.,]\\d+)?)\\s*(" + QTY_UNITS + ")\\s*[\\)\\]]?$", "i"));
+    if(tail && tail[1].trim()){
+      var unit = tail[3].toLowerCase();
+      if(unit.indexOf("kus") === 0) unit = "ks";
+      return tail[1].trim().replace(/[\s\-\u2013\u2014]+$/, "") + " - " + tail[2] + unit;
+    }
+    return t;
+  }
+
   function capFirst(s){
     s = String(s == null ? "" : s).trim();
     if(!s) return s;
@@ -1195,7 +1215,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     var add = [], skip = [];
     if(r && Array.isArray(r.add)) r.add.forEach(function(x){
       if(!x) return;
-      var n = capFirst(x.name);
+      var n = capFirst(normQty(x.name));
       if(n) add.push({ name: n, section: resolveSection(x.section) });
     });
     if(r && Array.isArray(r.skip)) r.skip.forEach(function(x){
