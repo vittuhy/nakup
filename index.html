@@ -103,8 +103,29 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .setup input::placeholder{font-size:13.5px; color:var(--ink-3)}
 .setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:15px; flex:0 0 auto}
 .setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
-#resetsec{display:block; margin-left:auto; text-align:right; color:var(--danger)}
+#resetsec{color:var(--danger)}
 .setup .blk + .blk{margin-top:16px; padding-top:16px; border-top:.5px solid var(--rule)}
+.setup a.card{
+  display:flex; align-items:center; gap:12px; margin-top:12px;
+  padding:11px 13px; border-radius:13px; text-decoration:none;
+  background:var(--bg); border:.5px solid var(--rule); color:var(--ink);
+  -webkit-tap-highlight-color:transparent;
+}
+.setup a.card:active{border-color:var(--accent-solid)}
+.card-ico{
+  width:38px; height:38px; border-radius:11px; flex:0 0 auto;
+  background:var(--accent-solid); color:var(--on-accent);
+  display:grid; place-items:center;
+}
+.card-ico svg{display:block}
+.card-txt{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
+.card-txt b{font-size:.97rem; font-weight:600; line-height:1.3}
+.card-txt i{font-style:normal; font-size:.77rem; color:var(--ink-3); line-height:1.3}
+.card-go{flex:0 0 auto; color:var(--ink-3); display:grid; place-items:center}
+.setup a.mini{
+  display:inline-block; margin-top:9px; font-size:.83rem;
+  color:var(--accent); text-decoration:none;
+}
 .setup .ginfo{margin-top:8px; font-size:.8rem; color:var(--ink-3); word-break:break-all}
 .credit{
   margin-top:26px; padding-top:18px; border-top:.5px solid var(--rule);
@@ -242,8 +263,23 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
         <input id="tok" name="github-token" type="password" placeholder="github_pat_…" autocomplete="current-password" autocapitalize="none" spellcheck="false">
         <button class="save" id="saveTok" type="button">Uložit</button>
       </div>
+      <a class="mini" href="https://github.com/settings/tokens/new?scopes=gist&amp;description=nakup"
+         target="_blank" rel="noopener">Vytvořit token na GitHubu →</a>
       <div class="ginfo" id="ginfo"></div>
       <button class="drop" id="dropTok" type="button" hidden>Vypnout synchronizaci</button>
+    </div>
+    <div class="blk">
+      <strong>Hlasové zadávání</strong>
+      Zkratka pro Action Button — zmáčkni, nadiktuj, položky přistánou v seznamu.
+      <a class="card" href="https://www.icloud.com/shortcuts/ecd367fc132e4deba6d45515ec9cfc05"
+         target="_blank" rel="noopener">
+        <span class="card-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></span>
+        <span class="card-txt">
+          <b>Nainstalovat zkratku</b>
+          <i>iCloud · Zkratky</i>
+        </span>
+        <span class="card-go"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a>
     </div>
     <div class="blk">
       <strong>Barva</strong>
@@ -270,9 +306,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       <div class="seg" id="modes"></div>
     </div>
     <div class="credit">
-      Vyvinuto pro Annu ❤️
+      Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 11:33</span>
+      <span class="build">build 22.09. 11:43</span>
     </div>
   </div>
 
