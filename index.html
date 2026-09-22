@@ -106,6 +106,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   margin-top:26px; padding-top:18px; border-top:.5px solid var(--rule);
   text-align:center; font-size:.83rem; color:var(--ink-3); line-height:1.65;
 }
+.credit .build{display:block; margin-top:6px; font-size:.72rem; opacity:.55}
 .credit .who{display:block; color:var(--ink-2); font-weight:500; letter-spacing:.01em}
 .swatches{display:flex; flex-wrap:wrap; gap:11px; margin-top:12px}
 .secrow{display:flex; align-items:center; gap:7px; padding:7px 0; border-bottom:.5px solid var(--rule)}
@@ -264,6 +265,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vyvinuto pro Annu ❤️
       <span class="who">@vittuhy</span>
+      <span class="build">build 22.09. 11:25</span>
     </div>
   </div>
 
@@ -724,8 +726,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     items.forEach(function(it){ buckets[resolveSection(it.section)].push(it); });
 
     var frag = document.createDocumentFragment(), anyVisible = false;
-    // only worth showing empty aisles once the list has something in it
-    var keepEmpty = showEmpty() && items.length > 0;
+    var keepEmpty = showEmpty();
 
     SECTIONS.forEach(function(sec){
       var all = buckets[sec.name];
@@ -779,7 +780,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
     elAisles.hidden = settingsOpen;
     elEmpty.hidden = true;
-    if(!settingsOpen){
+    if(!settingsOpen && !keepEmpty){
       if(!items.length){
         elEmpty.hidden = false;
         elEmpty.firstElementChild.textContent = "Seznam je prázdný";
