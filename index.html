@@ -39,6 +39,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{height:100%; background:var(--bg)}
 body{
   margin:0; background:var(--bg); color:var(--ink);
@@ -98,6 +99,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
 .setup .blk + .blk{margin-top:16px; padding-top:16px; border-top:.5px solid var(--rule)}
 .setup .ginfo{margin-top:8px; font-size:.8rem; color:var(--ink-3); word-break:break-all}
+.swatches{display:flex; flex-wrap:wrap; gap:11px; margin-top:12px}
+.sw{width:34px; height:34px; border-radius:50%; border:0; padding:0; cursor:pointer; flex:0 0 auto}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--bg-2), 0 0 0 4.5px var(--ink-2)}
 .setup .ginfo a{color:var(--accent)}
 .sync{font-size:.72rem; color:var(--ink-3); cursor:pointer; padding:8px 2px; white-space:nowrap}
 .sync.bad{color:#E5695F}
@@ -153,6 +157,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       <div class="ginfo" id="ginfo"></div>
       <button class="drop" id="dropTok" type="button" hidden>Disconnect sync</button>
     </div>
+    <div class="blk">
+      <strong>Barva</strong>
+      Colours the title, buttons and ticks. Travels with the list, so your other
+      devices pick it up too.
+      <div class="swatches" id="swatches"></div>
+    </div>
   </div>
 
   <div class="empty" id="empty" hidden>
@@ -189,12 +199,24 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     { name: "DM drogerie",          svg: "<svg viewBox=\"0 0 24 24\" width=\"21\" height=\"21\" aria-hidden=\"true\"><defs><clipPath id=\"dmc\"><rect width=\"24\" height=\"24\" rx=\"6\"/></clipPath></defs><g clip-path=\"url(#dmc)\"><rect width=\"24\" height=\"24\" fill=\"#1B3F94\"/><path d=\"M-1 15.8c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V18c-6 1.9-9.4 3.4-12.6 4.1-3.6.8-8-3-13.4-.6z\" fill=\"#FFC800\"/><path d=\"M-1 19.4c5-2.6 9.5 1.6 13 .7 3-.8 6-2.4 13-4.2V25H-1z\" fill=\"#E2001A\"/><text x=\"12\" y=\"12.6\" text-anchor=\"middle\" fill=\"#fff\" font-family=\"-apple-system,Helvetica,Arial,sans-serif\" font-size=\"11\" font-weight=\"700\" letter-spacing=\"-.5\">dm</text></g></svg>" }
   ];
   var FALLBACK = "Ostatní";
+
+  var THEMES = [
+    { id: "peach",    label: "Broskev",  light: { a: "#C96A63", s: "#E4A09B", on: "#FFFFFF" }, dark: { a: "#F2B8B5", s: "#F2B8B5", on: "#3A1512" } },
+    { id: "rose",     label: "Růžová",  light: { a: "#A85179", s: "#E3A0BF", on: "#FFFFFF" }, dark: { a: "#EDB7CE", s: "#EDB7CE", on: "#33101F" } },
+    { id: "butter",   label: "Máslová", light: { a: "#8E6A22", s: "#E5C878", on: "#3A2C06" }, dark: { a: "#EFD79A", s: "#EFD79A", on: "#2E2208" } },
+    { id: "mint",     label: "Máta",     light: { a: "#3F8266", s: "#8FCEB2", on: "#FFFFFF" }, dark: { a: "#A8DCC4", s: "#A8DCC4", on: "#0E2A1F" } },
+    { id: "sage",     label: "Šalvěj",   light: { a: "#65763F", s: "#B2C193", on: "#FFFFFF" }, dark: { a: "#C3CFA8", s: "#C3CFA8", on: "#1E2410" } },
+    { id: "sky",      label: "Obloha",   light: { a: "#3C6E9F", s: "#93BCE4", on: "#FFFFFF" }, dark: { a: "#A9CBEC", s: "#A9CBEC", on: "#0E2033" } },
+    { id: "lavender", label: "Levandule",light: { a: "#6A5BA8", s: "#B3A6E2", on: "#FFFFFF" }, dark: { a: "#C6BCEA", s: "#C6BCEA", on: "#1B1533" } },
+    { id: "slate",    label: "Břidlice",  light: { a: "#5B6874", s: "#A5B1BD", on: "#FFFFFF" }, dark: { a: "#B9C2CC", s: "#B9C2CC", on: "#171C21" } }
+  ];
   var MODEL = "gpt-4.1-mini";
   var K_ITEMS = "nakup.items", K_SHUT = "nakup.shut", K_DONE = "nakup.showdone", K_KEY = "nakup.key";
   var K_TOK = "nakup.ghtoken", K_GIST = "nakup.gistid", K_STAMP = "nakup.updated";
+  var K_THEME = "nakup.theme";
   var GIST_FILE = "nakup.json";
 
-  var items = [], shut = {}, showDone = true, busy = false;
+  var items = [], shut = {}, showDone = true, busy = false, settingsOpen = false;
 
   var elAisles = document.getElementById("aisles");
   var elEmpty  = document.getElementById("empty");
@@ -207,8 +229,49 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var elSync   = document.getElementById("sync");
   var elTok    = document.getElementById("tok");
   var elGinfo  = document.getElementById("ginfo");
+  var elSwatch = document.getElementById("swatches");
   var elKey    = document.getElementById("key");
   var elCog    = document.getElementById("cog");
+
+  var darkMQ = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function themeId(){
+    try { return localStorage.getItem(K_THEME) || "peach"; } catch(e){ return "peach"; }
+  }
+  function themeById(id){
+    for(var i = 0; i < THEMES.length; i++) if(THEMES[i].id === id) return THEMES[i];
+    return THEMES[0];
+  }
+  function applyTheme(){
+    var t = themeById(themeId());
+    var v = (darkMQ && darkMQ.matches) ? t.dark : t.light;
+    var r = document.documentElement.style;
+    r.setProperty("--accent", v.a);
+    r.setProperty("--accent-solid", v.s);
+    r.setProperty("--on-accent", v.on);
+  }
+  function setTheme(id, push){
+    try { localStorage.setItem(K_THEME, id); } catch(e){}
+    applyTheme();
+    renderSwatches();
+    if(push){ setStamp(Date.now()); scheduleSync(); }
+  }
+  function renderSwatches(){
+    if(!elSwatch) return;
+    elSwatch.textContent = "";
+    var dark = darkMQ && darkMQ.matches;
+    THEMES.forEach(function(t){
+      var b = document.createElement("button");
+      b.className = "sw";
+      b.type = "button";
+      b.title = t.label;
+      b.setAttribute("aria-label", t.label);
+      b.setAttribute("aria-pressed", t.id === themeId() ? "true" : "false");
+      b.style.background = dark ? t.dark.s : t.light.s;
+      b.addEventListener("click", function(){ setTheme(t.id, true); });
+      elSwatch.appendChild(b);
+    });
+  }
 
   function norm(s){
     return String(s == null ? "" : s).toLowerCase().replace(/&/g, "a").replace(/\s+/g, " ").trim();
@@ -330,13 +393,16 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     elAisles.textContent = "";
     elAisles.appendChild(frag);
 
+    elAisles.hidden = settingsOpen;
     elEmpty.hidden = true;
-    if(!items.length){
-      elEmpty.hidden = false;
-      elEmpty.firstElementChild.textContent = "Seznam je prázdný";
-    } else if(!anyVisible){
-      elEmpty.hidden = false;
-      elEmpty.firstElementChild.textContent = "Všechno hotovo";
+    if(!settingsOpen){
+      if(!items.length){
+        elEmpty.hidden = false;
+        elEmpty.firstElementChild.textContent = "Seznam je prázdný";
+      } else if(!anyVisible){
+        elEmpty.hidden = false;
+        elEmpty.firstElementChild.textContent = "Všechno hotovo";
+      }
     }
     sizeDock();
   }
@@ -393,7 +459,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     syncing = true;
     setSync("saving\u2026");
     try {
-      var body = JSON.stringify({ updatedAt: localStamp(), items: items });
+      var body = JSON.stringify({ updatedAt: localStamp(), theme: themeId(), items: items });
       var id = gistId(), res;
       if(id){
         res = await ghFetch("https://api.github.com/gists/" + id, {
@@ -437,6 +503,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
             items = remote.items;
             lsSet(K_ITEMS, items);
             setStamp(stamp);
+            if(remote.theme && remote.theme !== themeId()){
+              try { localStorage.setItem(K_THEME, remote.theme); } catch(e){}
+              applyTheme();
+              renderSwatches();
+            }
             render();
           }
         }
@@ -636,10 +707,15 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     }
   }
 
-  elCog.addEventListener("click", function(){
-    elSetup.hidden = !elSetup.hidden;
-    if(!elSetup.hidden) refreshSetup();
-  });
+  function showSettings(on){
+    settingsOpen = !!on;
+    elSetup.hidden = !settingsOpen;
+    elDock.hidden = settingsOpen;
+    if(settingsOpen) refreshSetup();
+    render();
+  }
+
+  elCog.addEventListener("click", function(){ showSettings(elSetup.hidden); });
 
   document.getElementById("saveTok").addEventListener("click", async function(){
     var v = elTok.value.trim();
@@ -661,7 +737,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   document.getElementById("dropTok").addEventListener("click", function(){
     try { localStorage.removeItem(K_TOK); localStorage.removeItem(K_GIST); } catch(e){}
     setSync("");
-    refreshSetup();
+    showSettings(false);
     say("Sync off. The gist itself is untouched.");
   });
 
@@ -671,12 +747,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     if(!v){ say("Nothing to save.", "err"); return; }
     try { localStorage.setItem(K_KEY, v); } catch(e){}
     elKey.value = "";
-    elSetup.hidden = true;
+    showSettings(false);
     say("Key saved.");
   });
   document.getElementById("dropKey").addEventListener("click", function(){
     try { localStorage.removeItem(K_KEY); } catch(e){}
-    elSetup.hidden = true;
+    showSettings(false);
     say("Key removed.");
   });
 
@@ -684,6 +760,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   items = lsGet(K_ITEMS, []); if(!Array.isArray(items)) items = [];
   shut = lsGet(K_SHUT, {}) || {};
   showDone = !!lsGet(K_DONE, true);
+  applyTheme();
+  renderSwatches();
+  if(darkMQ && darkMQ.addEventListener){
+    darkMQ.addEventListener("change", function(){ applyTheme(); renderSwatches(); });
+  }
   setBusy(false);
   render();
   sizeDock();
@@ -697,7 +778,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   elInput.addEventListener("focus", function(){ setTimeout(sizeDock, 120); });
   elInput.addEventListener("blur", function(){ setTimeout(sizeDock, 120); });
 
-  if(!getKey()) elSetup.hidden = false;
+  if(!getKey()) showSettings(true);
 
   if(ghToken()){
     (async function(){ await findGist(); await syncPull(); })();

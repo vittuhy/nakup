@@ -45,3 +45,9 @@ launch and whenever it returns to the foreground. Last write wins — the copy w
 the newer timestamp replaces the older one, so avoid editing on two devices at once.
 
 Tapping the small sync label next to ⚙ forces a pull and push.
+
+## Colour
+
+Eight pastels under ⚙. The choice rides along in the gist, so other devices
+pick it up on their next pull. Each theme carries a light and a dark variant
+and follows the phone's appearance setting.
