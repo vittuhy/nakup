@@ -120,31 +120,25 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .dock{flex:0 0 auto; z-index:30; background:var(--sheet); -webkit-backdrop-filter:saturate(180%) blur(22px); backdrop-filter:saturate(180%) blur(22px); border-top:.5px solid var(--rule); padding:9px 16px calc(9px + env(safe-area-inset-bottom,0px))}
 .dock-in{max-width:620px; margin:0 auto; display:flex; align-items:flex-end; gap:10px}
 @property --ang{syntax:'<angle>'; initial-value:0deg; inherits:false}
+/* Apple Intelligence's own stops: violet, pink, periwinkle, coral, orange.
+   No green, cyan or yellow — that is what turns a glow into a rainbow. */
 .field{position:relative; flex:1 1 auto; min-width:0; display:flex}
 .field::before,
 .field::after{
-  content:""; position:absolute; border-radius:24px;
+  content:""; position:absolute; border-radius:23px;
   z-index:0; pointer-events:none; opacity:0;
-  transition:opacity .28s ease;
-}
-/* wide halo */
-.field::before{
-  inset:-7px;
   background:conic-gradient(from var(--ang),
-    #FF2D55, #FF6B00, #FFD60A, #30D158, #00D2C6, #0A84FF, #5E5CE6, #BF5AF2, #FF2D55);
-  filter:blur(13px) saturate(2.2);
+    #BC82F3, #F5B9EA, #8D9FFF, #AA6EEE, #FF6778, #FFBA71, #C686FF, #BC82F3);
+  transition:opacity .3s ease;
 }
-/* tight bright rim */
-.field::after{
-  inset:-2px;
-  background:conic-gradient(from calc(var(--ang) * -1.7),
-    #FF375F, #BF5AF2, #0A84FF, #00D2C6, #FFD60A, #FF375F);
-  filter:blur(2.5px) saturate(2.4);
-}
-.field.busy::before{opacity:1; animation:spinang 2.6s linear infinite, halo 1.9s ease-in-out infinite}
-.field.busy::after {opacity:.95; animation:spinang 1.7s linear infinite}
+/* soft spill */
+.field::before{inset:-5px; filter:blur(8px)}
+/* crisp rim, same angle so the glow sits directly behind it */
+.field::after{inset:-1.5px; filter:blur(.5px)}
+.field.busy::before{opacity:.8; animation:spinang 3.4s linear infinite, breathglow 2.6s ease-in-out infinite}
+.field.busy::after {opacity:.9; animation:spinang 3.4s linear infinite}
 @keyframes spinang{to{--ang:360deg}}
-@keyframes halo{0%,100%{filter:blur(13px) saturate(2.2)}50%{filter:blur(19px) saturate(2.8)}}
+@keyframes breathglow{0%,100%{filter:blur(8px); opacity:.8}50%{filter:blur(12px); opacity:1}}
 .field textarea{position:relative; z-index:1}
 .field.busy textarea{border-color:transparent}
 .field .flash{z-index:2}
