@@ -91,10 +91,10 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 .setup{border-radius:13px; background:var(--bg-2); padding:14px; margin-top:14px; font-size:.88rem; color:var(--ink-2); line-height:1.45}
 .setup[hidden]{display:none!important}
 .setup strong{display:block; color:var(--ink); font-size:1rem; margin-bottom:4px}
-.setup .kb{display:flex; gap:8px; margin-top:10px}
-.setup input{flex:1; min-width:0; font:inherit; font-size:.9rem; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:9px; padding:9px 12px; outline:none}
+.setup .kb{display:flex; gap:8px; margin-top:10px; align-items:stretch}
+.setup input{flex:1; min-width:0; font:inherit; font-size:16px; color:var(--ink); background:var(--bg); border:.5px solid var(--rule); border-radius:9px; padding:9px 12px; outline:none}
 .setup input:focus{border-color:var(--accent-solid)}
-.setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:.9rem}
+.setup .save{border:0; border-radius:9px; background:var(--accent-solid); color:var(--on-accent); font-weight:600; padding:0 16px; cursor:pointer; font-size:15px; flex:0 0 auto}
 .setup .drop{background:none; border:0; color:var(--accent); font-size:.85rem; padding:8px 0 0; cursor:pointer}
 .setup .blk + .blk{margin-top:16px; padding-top:16px; border-top:.5px solid var(--rule)}
 .setup .ginfo{margin-top:8px; font-size:.8rem; color:var(--ink-3); word-break:break-all}
@@ -356,6 +356,21 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
 
   var syncTimer = null, syncing = false;
 
+  async function findGist(){
+    if(!ghToken() || gistId()) return;
+    try {
+      var res = await ghFetch("https://api.github.com/gists?per_page=100");
+      if(!res.ok) return;
+      var list = await res.json();
+      for(var i = 0; i < list.length; i++){
+        if(list[i] && list[i].files && list[i].files[GIST_FILE]){
+          try { localStorage.setItem(K_GIST, list[i].id); } catch(e){}
+          return;
+        }
+      }
+    } catch(e){}
+  }
+
   function scheduleSync(){
     if(!ghToken()) return;
     clearTimeout(syncTimer);
@@ -392,8 +407,9 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   }
 
   async function syncPull(){
-    if(!ghToken() || !gistId() || syncing) return;
+    if(!ghToken() || !gistId() || syncing) return 0;
     syncing = true;
+    var stamp = 0;
     try {
       var res = await ghFetch("https://api.github.com/gists/" + gistId());
       if(!res.ok) throw new Error("http " + res.status);
@@ -401,11 +417,17 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       var f = data.files && data.files[GIST_FILE];
       if(f && f.content){
         var remote = JSON.parse(f.content);
-        if(remote && Array.isArray(remote.items) && (remote.updatedAt || 0) > localStamp()){
-          items = remote.items;
-          lsSet(K_ITEMS, items);
-          setStamp(remote.updatedAt);
-          render();
+        if(remote && Array.isArray(remote.items)){
+          stamp = remote.updatedAt || 0;
+          // never replace a list that has things on it with an empty one,
+          // however new the empty one claims to be
+          var safe = remote.items.length > 0 || items.length === 0;
+          if(stamp > localStamp() && safe){
+            items = remote.items;
+            lsSet(K_ITEMS, items);
+            setStamp(stamp);
+            render();
+          }
         }
       }
       setSync("");
@@ -413,6 +435,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
       setSync("sync failed", true);
     }
     syncing = false;
+    return stamp;
   }
 
   function persist(){
@@ -612,9 +635,12 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     try { localStorage.setItem(K_TOK, v); } catch(e){}
     elTok.value = "";
     say("Token saved — checking…", "work");
-    if(gistId()) await syncPull();
-    setStamp(Date.now());
-    await syncPush();
+    await findGist();
+    var remoteStamp = gistId() ? await syncPull() : 0;
+    if(!gistId() || localStamp() > remoteStamp || items.length){
+      setStamp(Date.now());
+      await syncPush();
+    }
     refreshSetup();
     var ok = elSync.className.indexOf("bad") === -1;
     say(ok ? "Sync is on." : "GitHub rejected that token.", ok ? null : "err");
@@ -656,7 +682,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   if(!getKey()) elSetup.hidden = false;
 
   if(ghToken()){
-    syncPull();
+    (async function(){ await findGist(); await syncPull(); })();
     document.addEventListener("visibilitychange", function(){
       if(!document.hidden) syncPull();
     });
