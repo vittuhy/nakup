@@ -61,7 +61,14 @@ body{
 
 header.top{padding:22px 0 10px}
 .titlerow{display:flex; align-items:center; gap:10px}
-.titlerow h1{flex:1 1 auto; min-width:0}
+.titlerow h1{flex:1 1 auto; min-width:0; cursor:text}
+.titlerow input.title-edit{
+  flex:1 1 auto; min-width:0; font:inherit;
+  font-size:2.15rem; font-weight:800; letter-spacing:-.03em; line-height:1.05;
+  color:var(--accent); background:transparent;
+  border:0; border-bottom:2px solid var(--accent-solid);
+  padding:0 0 2px; outline:none; -webkit-appearance:none;
+}
 /* the title's ink sits ~3px below its line box, so box-centred controls read high */
 .titlerow .cog, .titlerow .sync{transform:translateY(3px)}
 h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent); margin:0; line-height:1.05}
@@ -338,7 +345,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     <div class="credit">
       Vytvořeno pro Annu ❤️
       <span class="who">@vittuhy</span>
-      <span class="build">build 22.09. 13:22</span>
+      <span class="build">build 22.09. 13:23</span>
     </div>
   </div>
 
@@ -404,6 +411,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var K_ITEMS = "nakup.items", K_SHUT = "nakup.shut", K_DONE = "nakup.showdone", K_KEY = "nakup.key";
   var K_TOK = "nakup.ghtoken", K_GIST = "nakup.gistid", K_STAMP = "nakup.updated";
   var K_THEME = "nakup.theme", K_MODE = "nakup.mode", K_EMPTY = "nakup.showempty";
+  var K_NAME = "nakup.listname";
+  var DEFAULT_NAME = "N\u00e1kup";
   var GIST_FILE = "nakup.json";
 
   var items = [], shut = {}, showDone = true, busy = false, settingsOpen = false;
@@ -424,6 +433,7 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   var elModes  = document.getElementById("modes");
   var elEmptyT = document.getElementById("emptyToggle");
   var elSecList = document.getElementById("seclist");
+  var elTitle  = document.querySelector(".titlerow h1");
   var elKey    = document.getElementById("key");
   var elCog    = document.getElementById("cog");
 
@@ -936,7 +946,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     setSync("ukládám\u2026");
     try {
       var body = JSON.stringify({ updatedAt: localStamp(), theme: themeId(), mode: modeId(),
-        showEmpty: showEmpty(), sections: SECTIONS, sectionsAt: sectionsAt(), items: items });
+        showEmpty: showEmpty(), listName: listName(),
+        sections: SECTIONS, sectionsAt: sectionsAt(), items: items });
       var id = gistId(), res;
       if(id){
         res = await ghFetch("https://api.github.com/gists/" + id, {
@@ -998,6 +1009,11 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
               rebuildIndex();
               renderSections();
             }
+            if(remote.listName && String(remote.listName).trim() &&
+               String(remote.listName).trim() !== listName()){
+              try { localStorage.setItem(K_NAME, String(remote.listName).trim()); } catch(e){}
+              applyListName();
+            }
             if(typeof remote.showEmpty === "boolean" && remote.showEmpty !== showEmpty()){
               try { localStorage.setItem(K_EMPTY, remote.showEmpty ? "1" : "0"); } catch(e){}
               renderToggles();
@@ -1019,6 +1035,49 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
     lsSet(K_ITEMS, items);
     setStamp(Date.now());
     scheduleSync();
+  }
+
+  function listName(){
+    var v = null;
+    try { v = localStorage.getItem(K_NAME); } catch(e){}
+    v = (v || "").trim();
+    return v || DEFAULT_NAME;
+  }
+  function applyListName(){
+    if(elTitle) elTitle.textContent = listName();
+    document.title = listName();
+  }
+  // tapping the title renames the list; it travels with everything else
+  function editTitle(){
+    if(!elTitle || document.querySelector(".title-edit")) return;
+    var input = document.createElement("input");
+    input.className = "title-edit";
+    input.type = "text";
+    input.value = listName();
+    input.setAttribute("aria-label", "N\u00e1zev seznamu");
+    input.setAttribute("spellcheck", "false");
+    elTitle.replaceWith(input);
+    input.focus();
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch(e){}
+
+    var settled = false;
+    function finish(save){
+      if(settled) return;
+      settled = true;
+      var v = input.value.trim();
+      if(save && v && v !== listName()){
+        try { localStorage.setItem(K_NAME, v); } catch(e){}
+        setStamp(Date.now());
+        scheduleSync();
+      }
+      input.replaceWith(elTitle);
+      applyListName();
+    }
+    input.addEventListener("blur", function(){ finish(true); });
+    input.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){ e.preventDefault(); finish(true); }
+      else if(e.key === "Escape"){ e.preventDefault(); finish(false); }
+    });
   }
 
   function toggle(it){ it.done = !it.done; persist(); render(); }
@@ -1429,6 +1488,8 @@ h1{font-size:2.15rem; font-weight:800; letter-spacing:-.03em; color:var(--accent
   items = lsGet(K_ITEMS, []); if(!Array.isArray(items)) items = [];
   shut = lsGet(K_SHUT, {}) || {};
   showDone = !!lsGet(K_DONE, true);
+  applyListName();
+  if(elTitle) elTitle.addEventListener("click", editTitle);
   loadSections();
   renderSections();
   applyTheme();

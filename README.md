@@ -67,3 +67,9 @@ fallback. Duplicate and empty names are refused, and the last section cannot be
 deleted. The fallback is the section named *Ostatní*, or the last one if it is
 gone. Category hints given to the model are filtered to sections that still exist.
 Drawn marks (the dm swatch) are keyed by name.
+
+## List name
+
+Tap the title to rename the list. The name is stored with everything else and
+travels through the gist. The home screen icon's label is fixed at install
+time, so renaming does not change it.
